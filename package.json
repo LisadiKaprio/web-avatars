@@ -1,5 +1,23 @@
 {
+  "name": "web-avatars",
+  "description": "Web Avatars :)",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LisadiKaprio/web-avatars.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LisadiKaprio/web-avatars/issues"
+  },
+  "homepage": "https://github.com/LisadiKaprio/web-avatars#readme",
   "dependencies": {
-    "twitch-js": "^2.0.0-beta.43"
+    "tmi.js": "^1.8.5"
   }
 }
