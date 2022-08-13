@@ -2,31 +2,10 @@
 const tmi = require('tmi.js');
 const fs = require('fs');
 
-//my options
-const options = {
-    options: {
-        debug: true,
-    },
-    connection: {
-        cluster: 'aws',
-        reconnect: true,
-    },
-    channels: ['LisadiKaprio'],
-};
-
-// insert options to client
-const client = new tmi.client(options);
-
-// connect the client to the chat
-client.connect();
-
-// WHEN client is connected to chat
-client.on('connected', (address, port) => {
-    console.log("Connected to chat!");
-})
-
 //= = = my own variables = = =
 
+// CHANNEL NAME
+const channelName = 'LisadiKaprio';
 // is bot active?
 const botActive = true;
 //start bot
@@ -69,6 +48,29 @@ function saveUser(username) {
 // = = =
 
 
+// tmi client options
+const options = {
+    options: {
+        debug: true,
+    },
+    connection: {
+        cluster: 'aws',
+        reconnect: true,
+    },
+    channels: [channelName],
+};
+
+// insert options to client
+const client = new tmi.client(options);
+
+// connect the client to the chat
+client.connect();
+
+// WHEN client is connected to chat
+client.on('connected', (address, port) => {
+    console.log("Connected to chat!");
+})
+
 // taken straight from tmijs.com
 // // channel = my channel?
 // // tags = user who wrote the message
@@ -92,7 +94,7 @@ client.on('message', (channel, tags, message, self) => {
         const args = detectedCommand[2].trim();//.split(/\s+/)
 
         if (tags.mod || tags.badges.broadcaster){
-            //setup to turn off bot with my/mod's chat message
+            // MOD/BROADCASTER COMMANDS
             // !startWeb
             if(message === startMessage){
                 botActive = true;
