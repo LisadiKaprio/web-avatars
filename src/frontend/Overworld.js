@@ -8,20 +8,87 @@ class Overworld{
         this.canvas = this.element.querySelector(".game-canvas");
         // in this canvas, reference drawing methods?? stuff? idk
         this.ctx = this.canvas.getContext("2d");
+
+        // // const userAvatar
+        // this.userAvatar = new GameObject({
+        //     x: 1,
+        //     y: 1,
+        //     src: "images/chars/1.png"
+        // })
+
+        
+        this.userAvatars = {};
     }
 
-    init() {
-
+    createNewUserAvatar(user){
         // place game object
-        const userAvatar = new GameObject({
-            x: 1,
+        this.userAvatars[user.name] = new GameObject({
+            name: user.name,
+            x: Math.random() * this.canvas.width,
             y: 1,
             src: "images/chars/1.png"
         })
 
-        setTimeout(() => {
-            userAvatar.sprite.draw(this.ctx);
-        }, 200);
+    }
+
+    update(users){
+        // difference between value and keys:
+        // value = {name: 'kirinokirino', messageCount: 2}
+        // key = kirinokirino
+        // key is like 1 in array[1]
+        for (const user of Object.keys(users)) {
+            if(!this.userAvatars[user]){
+                this.createNewUserAvatar(users[user]);
+                //console.log(users[user]);
+                //console.log(user);
+            }
+        };
+        
+        // console.log(users);
+        // console.log(this.userAvatars);
+        // debugger;
+
+
+    }
+
+    // game loop
+    // - updating frames, moving pos of the chars
+    startGameLoop(){
+        const step = () => {
+            // clear canvas
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+            for(const userAvatar of Object.values(this.userAvatars)){
+                userAvatar.sprite.draw(this.ctx);
+            }
+    
+    
+            // draw objects
+            //userAvatar.sprite.draw(this.ctx);
+    
+            requestAnimationFrame(() => {
+                step();
+            })
+        }
+        step();
+    }
+    
+
+    init() {
+
+        this.startGameLoop();
+        console.log('init');
+
+        // place game object
+        // const userAvatar = new GameObject({
+        //     x: 1,
+        //     y: 1,
+        //     src: "images/chars/1.png"
+        // })
+
+        // setTimeout(() => {
+        //     userAvatar.sprite.draw(this.ctx);
+        // }, 200);
 
     }
 }

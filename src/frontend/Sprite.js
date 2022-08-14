@@ -24,9 +24,9 @@ class Sprite {
         this.gameObject = config.gameObject;
     }
     draw(ctx){
-        //nudge the image in place if needed
-        //const x = this.gameObject.x * 16 - 8;
-        //const y = this.gameObject.y * 16 - 18;
+        // position control (add nudge if needed)
+        const x = this.gameObject.x;
+        const y = this.gameObject.y;
 
         if(this.isLoaded){
             ctx.drawImage(this.image,
@@ -34,8 +34,8 @@ class Sprite {
                 0,0,
                 // size of the cut on x and y
                 150,150,
-                // nudge can come in here
-                0, 0,
+                // position comes in here
+                x, y,
                 // display size
                 75, 75)
 

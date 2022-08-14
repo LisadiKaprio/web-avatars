@@ -399,3 +399,8 @@ app.listen(port, () => {
   console.log(`Web-Avatars listening on port ${port}`)
 })
 ```
+
+* difference between value and keys:
+  * value = {name: 'kirinokirino', messageCount: 2}
+  * key = kirinokirino
+  * key is like 1 in array[1]

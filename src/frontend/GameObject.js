@@ -2,6 +2,8 @@
 
 class GameObject {
     constructor(config){
+        // username
+        this.name = config.name || "NoName";
         // define and pass in position, or else default to 0
         this.x = config.x || 0;
         this.y = config.y || 0;
