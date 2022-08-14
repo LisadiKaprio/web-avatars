@@ -233,3 +233,169 @@ if (message === '!deleteme') {
     saveUser(username)
 }
 ```
+
+# 13/08/2022
+
+[x] executing on localhost:2501
+```json
+"start": "serve src/ -l 2501"
+```
+
+* plan: every new user that enters chat spawns a new gameobject, it displays a character sprite on random position of the game canvas, it holds the json object of the user and gets info from there: f.e. the color
+
+# 14/08/2022
+
+
+* para showed me how to divide frontend and backend. this is the code that comes into the frontend/index.js
+  * I will have to implement parts of that into the Overworld.js script most likely, not have a frontend/index.js
+```js
+
+// why T_T
+// i don't get why it's wrapped in an async and then executed at the end on a separate line, para says it's just how things work in browser
+async function main () {
+
+    console.log('Frontend index.js loaded.');
+
+    // what I have already written in overworld.js - getting reference to the canvas in html
+    const canvas = document.querySelector('.game-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // defining the local users variable
+    let users = {};
+
+    // here para explained how function gets simplified syntax:
+
+    function getThis (param1) {
+         return '123123' + param1
+     }
+    
+    const getThis = (param1) => {
+         return '123123' + param1
+     }
+    
+    const getThis = (param1) => '123123' + param1
+
+    //
+    
+    // ugly code that is more easy for me to understand:
+    // this function gets data out of the backend
+    function pollForData () {
+        // send a request to the server and store data in some variable
+
+        // in the backend script, we have this written:
+        // app.get('/users', (req, res) => {
+        //    res.send(users)
+        //  })
+        // that way, backend creates a localhost:2501/users,
+        // and now this frontend index.js fetches info from that address
+        fetch('/users')
+            // we save what we get in the resp variable
+            // and turn it into a resp.json
+            .then(function (resp) {
+                return resp.json()
+            })
+            // we put this resp.json in the data variable
+            // and assign the value of it to our local users variable
+            // then call a function described later, to redraw the canvas with new info from the users variable 
+            .then(function (data) {
+                users = data
+                redraw()
+            })
+            // we catch an error if something goes wrong in the above 2 steps
+            .catch(function (error) {
+                console.error(error)
+            })
+            // in the end, we execute this pollForData function again,
+            // but we also wait 5 seconds everytime to do so
+            .finally(function () {
+                setTimeout(function () {
+                    pollForData()
+                }, 5000)
+            })
+    }
+    
+    
+    // start polling for data
+    pollForData()
+
+  
+    // this is the proper way to write that same function
+    // it needs to be async because ???????????  
+    async function pollForDataAsync () {
+        // send a request to the server and store data in some variable
+
+        // we try to fetch this localhost:2501/users,
+        // and put it into the resp variable
+        // then we try to put the .json from it into our local users variable
+        // then we call this redraw function described later
+        // if any on this won't work, we catch an error
+        // then we wait for 5 seconds and then execute this same function again
+        try {
+            const resp = await fetch('/users')
+            users = await resp.json()
+            redraw()
+        } catch (error) {
+            console.error(error)
+        }
+        setTimeout(pollForDataAsync, 5000)
+    }
+    
+    
+    await pollForDataAsync()
+
+
+    // this function redraws the canvas
+    function redraw () {
+        // define the position of the text that will be written
+        let y = 50
+        let x = 50
+        // ?? idk it erases the whole canvas probably
+        ctx.clearRect(0, 0, canvas.clientWidth, canvas.height)
+        // for every key in the users object
+        // (para told me i might need to make users an array instead of an object later)
+        for (const key of Object.keys(users)) {
+            // here, user is one key from the users object
+            const user = users[key]
+            // writes text that displays some info from that user object
+            ctx.fillText(`${user.name} (${user.messageCount})`, x, y)
+            // moves the y by some pixels down so the text for the next user is written a bit more to the bottom
+            y += 20
+        }
+    }
+    
+}
+// executes the whole script here
+main()
+```
+
+* what's in the backend server/index.js:
+
+```js
+
+// COMMUNICATION WITH THE FRONTEND
+
+const express = require('express');
+const app = express();
+
+// what port do we run on?
+const port = 2501;
+
+// what folder will express start up?
+// where is our frontend
+app.use(express.static('src/frontend'));
+
+// what's displayed in localhost:2501
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+// send over the info inside the users variable
+app.get('/users', (req, res) => {
+  res.send(users)
+})
+
+// (: 
+app.listen(port, () => {
+  console.log(`Web-Avatars listening on port ${port}`)
+})
+```

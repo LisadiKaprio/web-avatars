@@ -1,6 +1,8 @@
 'use strict'
+
 const tmi = require('tmi.js');
 const fs = require('fs');
+
 
 //= = = my own variables = = =
 
@@ -70,6 +72,18 @@ client.connect();
 client.on('connected', (address, port) => {
     console.log("Connected to chat!");
 })
+
+
+// hmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
+// // load the browser page with the game world on it
+// (function(){
+//     // create a new Overworld instance
+//     const overworld = new Overworld({
+//         element: document.querySelector(".game-container")
+//     });
+//     // make it do the do
+//     overworld.init();
+// })
 
 // taken straight from tmijs.com
 // // channel = my channel?
@@ -145,4 +159,30 @@ client.on('message', (channel, tags, message, self) => {
 
 	console.log(users);
 });
-		
+
+// COMMUNICATION WITH THE FRONTEND
+
+const express = require('express');
+const app = express();
+
+// what port do we run on?
+const port = 2501;
+
+// what folder will express start up?
+// where is our frontend
+app.use(express.static('src/frontend'));
+
+// what's displayed in localhost:2501
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+// send over the info inside the users variable
+app.get('/users', (req, res) => {
+  res.send(users)
+})
+
+// (: 
+app.listen(port, () => {
+  console.log(`Web-Avatars listening on port ${port}`)
+})
