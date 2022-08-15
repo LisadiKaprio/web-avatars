@@ -16,19 +16,22 @@ class GameObject {
 
         
         this.stepsTilTarget = 24;
+        this.speed = config.speed || 1;
         this.directionalUpdate = {
-            "left": ["x", -8],
-            "right": ["x", 8]
+            "left": ["x", -this.speed],
+            "right": ["x", this.speed]
         };
+        // default direction
         this.direction = "left";
 
 
         // https://www.youtube.com/watch?v=e144CXGy2mc part 8
         this.behaviourLoop = config.behaviourLoop || [
             { type: "walk", direction: "left"},
-            { type: "stand", direction: "left", time: 800},
+            // could use small time value to have them run around chaotically!
+            { type: "stand", direction: "left", time: Math.random()*4000},
             { type: "walk", direction: "right"},
-            { type: "stand", direction: "right", time: 800},
+            { type: "stand", direction: "right", time: Math.random()*4000},
         ]
         this.behaviourLoopIndex = 0;
     }
@@ -61,7 +64,7 @@ class GameObject {
         // change the value so it knows it took a step
         this.stepsTilTarget -= 1;
 
-        if(this.stepsTilTarget === 0){
+        if(this.stepsTilTarget <= 0){
             // We finished the walk!
 
             // in-browser class
@@ -83,7 +86,7 @@ class GameObject {
 
             // Ready to walk
             // resets step
-            this.stepsTilTarget = 16;
+            this.stepsTilTarget = Math.random()*69;
         }
         if(behavior.type === "stand"){
             setTimeout(() => {

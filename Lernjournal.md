@@ -404,3 +404,21 @@ app.listen(port, () => {
   * value = {name: 'kirinokirino', messageCount: 2}
   * key = kirinokirino
   * key is like 1 in array[1]
+
+[x] make avatars have walking-standing behavior and execute it by default
+
+[x] make it random
+
+[x] idle animation
+
+[x] only show users from current section
+
+* next TODO:
+
+[ ] usernames floating above avatars
+
+[ ] usernames having the same color as in twitch chat
+
+[ ] used emotes appearing above avatars
+
+[ ] emotes having float up and disappear animation

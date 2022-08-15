@@ -14,6 +14,8 @@ const botActive = true;
 const startMessage = 'startWeb';
 //end bot
 const endMessage = 'endWeb';
+//clear users in this session
+const clearUsers = 'clearUsers';
 
 // = = =
 
@@ -23,6 +25,7 @@ const DATA_DIR = './data';
 const USER_DATA_DIR =  DATA_DIR + '/users';
 
 const users = loadUsers();
+let usersInThisSession = {};
 
 function loadUsers() {
     const users = {};
@@ -110,6 +113,10 @@ client.on('message', (channel, tags, message, self) => {
         if (tags.mod || tags.badges.broadcaster){
             // MOD/BROADCASTER COMMANDS
             // !startWeb
+            if(message === clearUsers){
+                usersInThisSession = {};
+                //needs something in frontend that reacts to that too and deletes gameobjects
+            }
             if(message === startMessage){
                 botActive = true;
             }
@@ -148,16 +155,24 @@ client.on('message', (channel, tags, message, self) => {
             // save that as a json file then
             // saveUser(username);
         } 
+
+        // same, but for new users in current session aka current stream
+        if (!(username in usersInThisSession)) {
+            // WHAT's IN THE USER?
+            usersInThisSession[username] = {
+                name: username,
+                messageCount: 0,
+                };
+        } 
         
         // counts messages written by the user
         // part of the game?
         users[username].messageCount += 1;
+        usersInThisSession[username].messageCount += 1;
 
         // save that as a json file then
         saveUser(username);
     }
-
-	console.log(users);
 });
 
 // COMMUNICATION WITH THE FRONTEND
@@ -179,7 +194,7 @@ app.get('/', (req, res) => {
 
 // send over the info inside the users variable
 app.get('/users', (req, res) => {
-  res.send(users)
+  res.send(usersInThisSession)
 })
 
 // (: 
