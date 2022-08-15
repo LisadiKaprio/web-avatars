@@ -18,6 +18,8 @@ class Overworld{
 
         
         this.userAvatars = {};
+
+        this.isCutscenePlaying = false;
     }
 
     createNewUserAvatar(user){
@@ -28,8 +30,24 @@ class Overworld{
             y: 1,
             src: "images/chars/1.png"
         })
+        this.userAvatars[user.name].mount(this);
 
     }
+
+    // MY WONKY CODE HMM
+    // walkUserAvatar(user){
+    //     // let targetX = 0;
+    //     // let stepsTilTarget = 0;
+    //     if(user.stepsTilTarget == 0){
+    //         user.x = Math.random() * this.canvas.width;
+    //     }
+    //     this.stepUserAvatar(user, )
+
+    // }
+
+    // stepUserAvatar(user, property, change){
+
+    // }
 
     update(users){
         // difference between value and keys:
@@ -39,6 +57,7 @@ class Overworld{
         for (const user of Object.keys(users)) {
             if(!this.userAvatars[user]){
                 this.createNewUserAvatar(users[user]);
+                
                 //console.log(users[user]);
                 //console.log(user);
             }
@@ -59,6 +78,7 @@ class Overworld{
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
             for(const userAvatar of Object.values(this.userAvatars)){
+                userAvatar.update();
                 userAvatar.sprite.draw(this.ctx);
             }
     
@@ -72,6 +92,8 @@ class Overworld{
         }
         step();
     }
+
+    
     
 
     init() {

@@ -27,7 +27,7 @@ async function main () {
 
             // redraw
             overworld.update(usersInFrontend);
-            
+
         } catch (error) {
             console.error(error)
         }
