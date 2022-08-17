@@ -8,25 +8,25 @@ async function main () {
     let overworld = new Overworld({
         element: document.querySelector(".game-container")
     });
-    
-    function drawWorld(){
-        // let overworld go
-        overworld.init();
-    }  
+    // let overworld go
+    overworld.init();
 
-    drawWorld();
 
     let usersInFrontend = {};
-    
+
+    let newEmotesArray = [];
 
     async function pollForDataAsync () {
         // send a request to the server and store data in some variable
         try {
             const resp = await fetch('/users')
-            usersInFrontend = await resp.json()
+            let {users, emotes} = await resp.json()
+            
+            usersInFrontend = users;
+            newEmotesArray = emotes;
 
             // redraw
-            overworld.update(usersInFrontend);
+            overworld.update(usersInFrontend, newEmotesArray);
 
         } catch (error) {
             console.error(error)

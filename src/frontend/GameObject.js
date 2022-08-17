@@ -16,11 +16,11 @@ class GameObject {
         this.color = config.color || 'black';
 
         
-        this.stepsTilTarget = 24;
+        this.stepsTilTarget = config.stepsTilTarget || 24;
         this.speed = config.speed || 1;
         this.walkingTime = config.walkingTime || 69;
         this.standTime = config.standTime || 4000;
-        this.directionalUpdate = {
+        this.directionalUpdate = config.directionalUpdate || {
             "left": ["x", -this.speed],
             "right": ["x", this.speed]
         };

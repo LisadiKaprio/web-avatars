@@ -18,6 +18,7 @@ class Overworld{
 
         
         this.userAvatars = {};
+        this.renderedEmotes = [];
 
         this.isCutscenePlaying = false;
     }
@@ -35,22 +36,7 @@ class Overworld{
 
     }
 
-    // MY WONKY CODE HMM
-    // walkUserAvatar(user){
-    //     // let targetX = 0;
-    //     // let stepsTilTarget = 0;
-    //     if(user.stepsTilTarget == 0){
-    //         user.x = Math.random() * this.canvas.width;
-    //     }
-    //     this.stepUserAvatar(user, )
-
-    // }
-
-    // stepUserAvatar(user, property, change){
-
-    // }
-
-    update(users){
+    update(users, emoteArray){
         // difference between value and keys:
         // value = {name: 'kirinokirino', messageCount: 2}
         // key = kirinokirino
@@ -58,17 +44,26 @@ class Overworld{
         for (const user of Object.keys(users)) {
             if(!this.userAvatars[user]){
                 this.createNewUserAvatar(users[user]);
-                
-                //console.log(users[user]);
-                //console.log(user);
             }
         };
-        
-        // console.log(users);
-        // console.log(this.userAvatars);
-        // debugger;
+        //this.renderedEmotes = [];
+        for (let i = 0; i < emoteArray.length; i++) {
+            this.createNewEmote(emoteArray[i].id);
+            
+            this.renderedEmotes[i].mount(this);
+        }
+    }
+    createNewEmote(emoteId){
+        this.renderedEmotes.push(new GameObject({
+            x: Math.random() * this.canvas.width,
+            y: 950,
+            src: this.getEmoteImg(emoteId)
+        }))
+    }
 
-
+    // get (normal twitchtv) emotes
+    getEmoteImg(emoteId) {
+	    return "https://static-cdn.jtvnw.net/emoticons/v2/" + emoteId + "/default/dark/2.0";
     }
 
     // game loop
@@ -87,6 +82,10 @@ class Overworld{
                 this.ctx.fillStyle = userAvatar.color;
                 this.ctx.font = 'bold 16px VictorMono-Medium';
                 this.ctx.fillText(userAvatar.name, userAvatar.x + (75/2), userAvatar.y + 75 + 3);
+            }
+            for(const emote of Object.values(this.renderedEmotes)){
+                emote.update();
+                emote.sprite.draw(this.ctx);
             }
     
     

@@ -27,6 +27,8 @@ const USER_DATA_DIR =  DATA_DIR + '/users';
 const users = loadUsers();
 let usersInThisSession = {};
 
+let newEmotesArray = [];
+
 function loadUsers() {
     const users = {};
     const files = fs.readdirSync(USER_DATA_DIR);
@@ -154,6 +156,25 @@ client.on('message', (channel, tags, message, self) => {
         if (!(username in usersInThisSession)) {
             putUserIntoObject(usersInThisSession, tags);
         } 
+
+        if(tags.emotes){
+
+            
+            for(const [emote, charPositions] of Object.entries(tags.emotes)){
+                for (let i = 0; i < charPositions.length; i++) {
+                    newEmotesArray.push({
+                        name: username,
+                        id: emote
+                    })
+                    console.log(emote);
+                }
+            }
+            // for each emote in message
+            // emote[1] = { who: kirinokirino, id: 65}
+            // emote[2] = { who: kirinokirino, id: 65}
+            // emote[3] = { who: kirinokirino, id: 46636}
+
+        }
         
         // counts messages written by the user
         // part of the game?
@@ -190,15 +211,19 @@ app.use(express.static('src/frontend'));
 
 // what's displayed in localhost:2501
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+    res.send('Hello World!')
 })
 
 // send over the info inside the users variable
 app.get('/users', (req, res) => {
-  res.send(usersInThisSession)
+    res.send({
+        users: usersInThisSession, 
+        emotes: newEmotesArray
+    })
+    newEmotesArray = [];
 })
 
 // (: 
 app.listen(port, () => {
-  console.log(`Web-Avatars listening on port ${port}`)
+    console.log(`Web-Avatars listening on port ${port}`)
 })

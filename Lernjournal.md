@@ -432,3 +432,9 @@ ctx.fillStyle = 'blue';
 
 * kirino kirino, [17/08/2022 18:10]
 ctx.font = 'bold 48px serif';
+
+* ```
+for (const [emote, charPositions] of Object.entries(tags.emotes)) {
+    console.log(${key}: ${value});
+}
+```
