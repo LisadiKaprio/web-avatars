@@ -11,9 +11,11 @@ class Sprite {
             this.isLoaded = true;
         }
 
+        this.isEmote = config.isEmote || false;
+
         // configure animation and initial state
         this.animations = config.animations || {
-            "idle": [ [0,0], [1, 0] ]
+            "idle": [ [0,0] ]
         }
         this.currentAnimation = config.currentAnimation || "idle";
         this.currentAnimationFrame = 0;

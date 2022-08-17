@@ -3,7 +3,7 @@
 class GameObject {
     constructor(config){
         // username
-        this.name = config.name || "NoName";
+        this.name = (config.name === undefined) ? "NoName" : config.name;
         // define and pass in position, or else default to 0
         this.x = config.x || 0;
         this.y = config.y || 950;
@@ -11,16 +11,26 @@ class GameObject {
         this.sprite = new Sprite({
             gameObject: this,
             src: config.src || "./images/chars/1.png",
-
+            animations: config.animations || {"idle": [ [0,0], [1, 0] ]}
         });
         this.color = config.color || 'black';
 
         
-        this.stepsTilTarget = config.stepsTilTarget || 24;
+        this.stepsTilTarget = (config.stepsTilTarget === undefined) ? 24 : config.stepsTilTarget;
         this.speed = config.speed || 1;
+
+        this.speedPhysicsX = config.speedPhysicsX || 0;
+        this.speedPhysicsY = config.speedPhysicsY || 0;
+
+        this.dragPhysicsY = config.dragPhysicsY || 0;
+
         this.walkingTime = config.walkingTime || 69;
         this.standTime = config.standTime || 4000;
-        this.directionalUpdate = config.directionalUpdate || {
+        this.directionalUpdate = config.directionalUpdate 
+        // podbrasivaetsya 
+        // 
+        // complete disappear
+        || {
             "left": ["x", -this.speed],
             "right": ["x", this.speed]
         };
@@ -49,14 +59,14 @@ class GameObject {
 
 
     update(){
+        if(this.behaviourLoop[this.behaviourLoopIndex].type === "physics"){
+            this.updateEmotePosition();
+
+        }
         if(this.stepsTilTarget > 0){
             this.updatePosition();
             //this.updateSprite(state);
-        } else{
-
-            //TODO: case to move character or something???
-
-        }
+        } 
     }
 
     updatePosition(){
@@ -81,6 +91,17 @@ class GameObject {
         }
     }
 
+    updateEmotePosition(){
+        this.x += this.speedPhysicsX;
+        //this.speedPhysicsX += this.accelerationPhysicsX;
+        
+        this.y += this.speedPhysicsY;
+        this.speedPhysicsY -= this.dragPhysicsY;
+        //debugger;
+
+
+    }
+
     startBehavior(state, behavior){
         // Set character direction to whatever behavior has
         this.direction = behavior.direction;
@@ -101,6 +122,13 @@ class GameObject {
                 document.dispatchEvent(event);
             }, behavior.time);
         }
+        // if(behavior.type === "physics"){
+        //     // if we want collision, the stop for it comes here
+
+        //     // Ready to walk
+        //     // resets step
+        //     this.stepsTilTarget = Math.random()*this.walkingTime;
+        // }
 
     }
 
@@ -110,7 +138,7 @@ class GameObject {
         
         // Don't execute this function if there's an overarching event happening
         // or if my behavior is empty
-        if(overworld.isCutscenePlaying || this.behaviourLoop.length === 0){
+        if(overworld.isCutscenePlaying || this.behaviourLoop.length === 0 || !this.sprite.isLoaded){
             return;
         }
 

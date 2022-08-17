@@ -31,7 +31,7 @@ async function main () {
         } catch (error) {
             console.error(error)
         }
-        setTimeout(pollForDataAsync, 5000)
+        setTimeout(pollForDataAsync, 1000)
     }
     
     await pollForDataAsync()

@@ -166,7 +166,6 @@ client.on('message', (channel, tags, message, self) => {
                         name: username,
                         id: emote
                     })
-                    console.log(emote);
                 }
             }
             // for each emote in message

@@ -16,6 +16,8 @@ class Overworld{
         //     src: "images/chars/1.png"
         // })
 
+        this.maxEmotes = 25;
+
         
         this.userAvatars = {};
         this.renderedEmotes = [];
@@ -48,16 +50,28 @@ class Overworld{
         };
         //this.renderedEmotes = [];
         for (let i = 0; i < emoteArray.length; i++) {
-            this.createNewEmote(emoteArray[i].id);
+            this.createNewEmote(emoteArray[i].id, this.userAvatars[emoteArray[i].name].x, this.userAvatars[emoteArray[i].name].y);
             
             this.renderedEmotes[i].mount(this);
         }
     }
-    createNewEmote(emoteId){
+    createNewEmote(emoteId, userAvatarx, userAvatary){
+        // make the name match the index of this new emote, so the behaviours get communicated later on
+        let id = this.renderedEmotes.length;
         this.renderedEmotes.push(new GameObject({
-            x: Math.random() * this.canvas.width,
-            y: 950,
-            src: this.getEmoteImg(emoteId)
+            name: id,
+            x: userAvatarx + (75/2),
+            y: userAvatary - 25,
+            src: this.getEmoteImg(emoteId),
+            behaviourLoop: [
+                { type: "physics" },
+
+            ],
+            animations: {"idle": [ [0,0] ]},
+            speedPhysicsX: Math.random()*6-3,
+            speedPhysicsY: -(Math.random()*5),
+            dragPhysicsY: -0.02,
+            stepsTilTarget: 0
         }))
     }
 
@@ -83,15 +97,14 @@ class Overworld{
                 this.ctx.font = 'bold 16px VictorMono-Medium';
                 this.ctx.fillText(userAvatar.name, userAvatar.x + (75/2), userAvatar.y + 75 + 3);
             }
-            for(const emote of Object.values(this.renderedEmotes)){
-                emote.update();
-                emote.sprite.draw(this.ctx);
+            // for(const emote of Object.values(this.renderedEmotes)){
+            //     emote.update();
+            //     emote.sprite.draw(this.ctx);
+            // }
+            for (let i = (this.renderedEmotes.length > this.maxEmotes) ? this.renderedEmotes.length - this.maxEmotes : 0; i < this.renderedEmotes.length; i++) {
+                this.renderedEmotes[i].update();
+                this.renderedEmotes[i].sprite.draw(this.ctx);
             }
-    
-    
-            // draw objects
-            //userAvatar.sprite.draw(this.ctx);
-    
             requestAnimationFrame(() => {
                 step();
             })

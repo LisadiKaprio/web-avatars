@@ -58,6 +58,31 @@ class OverworldEvent{
 
     }
 
+    physics(resolve){
+        // receive communication on which emote should be animated
+        const who = this.overworld.renderedEmotes[this.event.who];
+
+        who.startBehavior({
+            overworld: this.overworld
+        }, {
+            type: "physics",
+            
+        })
+
+        // Set up a handler to complete 
+        // when correct person is done walking,
+        // then resolve the event
+        const completeHandler = e => {
+            if(e.detail.whoName === this.event.who){
+                document.removeEventListener("EmoteAnimationComplete", completeHandler);
+                resolve();
+            }
+        }
+
+        document.addEventListener("EmoteAnimationComplete", completeHandler)
+
+    }
+
     // kicks off event
     init() {
         // resolve comes back with the promise x_x
