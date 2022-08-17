@@ -422,3 +422,13 @@ app.listen(port, () => {
 [ ] used emotes appearing above avatars
 
 [ ] emotes having float up and disappear animation
+
+# 17/08/2022
+
+* ` style="color: rgb(0, 128, 0);" ` to set color of a (text) element
+
+* kirino kirino, [17/08/2022 18:10]
+ctx.fillStyle = 'blue';
+
+* kirino kirino, [17/08/2022 18:10]
+ctx.font = 'bold 48px serif';

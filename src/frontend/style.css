@@ -1,4 +1,11 @@
 
+@font-face {
+  font-family: 'VictorMono-Medium';
+  src: url('fonts/VictorMono-Medium.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body{
   padding: 0;
   margin: 0;
@@ -7,6 +14,7 @@ body{
 }
 
 .game-container{
+  font-family: 'VictorMono-Medium';
   position: relative;
   width: 1920px;
   height: 1080px;

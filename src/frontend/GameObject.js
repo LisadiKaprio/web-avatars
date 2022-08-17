@@ -6,17 +6,20 @@ class GameObject {
         this.name = config.name || "NoName";
         // define and pass in position, or else default to 0
         this.x = config.x || 0;
-        this.y = config.y || 0;
+        this.y = config.y || 950;
         // define sprite
         this.sprite = new Sprite({
             gameObject: this,
             src: config.src || "./images/chars/1.png",
 
         });
+        this.color = config.color || 'black';
 
         
         this.stepsTilTarget = 24;
         this.speed = config.speed || 1;
+        this.walkingTime = config.walkingTime || 69;
+        this.standTime = config.standTime || 4000;
         this.directionalUpdate = {
             "left": ["x", -this.speed],
             "right": ["x", this.speed]
@@ -29,9 +32,9 @@ class GameObject {
         this.behaviourLoop = config.behaviourLoop || [
             { type: "walk", direction: "left"},
             // could use small time value to have them run around chaotically!
-            { type: "stand", direction: "left", time: Math.random()*4000},
+            { type: "stand", direction: "left", time: Math.random()*this.standTime},
             { type: "walk", direction: "right"},
-            { type: "stand", direction: "right", time: Math.random()*4000},
+            { type: "stand", direction: "right", time: Math.random()*this.standTime},
         ]
         this.behaviourLoopIndex = 0;
     }
@@ -86,7 +89,7 @@ class GameObject {
 
             // Ready to walk
             // resets step
-            this.stepsTilTarget = Math.random()*69;
+            this.stepsTilTarget = Math.random()*this.walkingTime;
         }
         if(behavior.type === "stand"){
             setTimeout(() => {

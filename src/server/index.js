@@ -147,22 +147,12 @@ client.on('message', (channel, tags, message, self) => {
         // detect user chatting as a participator of the game
         // first, save the user in the db if they weren't yet
         if (!(username in users)) {
-            // WHAT's IN THE USER?
-            users[username] = {
-                name: username,
-                messageCount: 0,
-                };
-            // save that as a json file then
-            // saveUser(username);
+            putUserIntoObject(users, tags);
         } 
 
         // same, but for new users in current session aka current stream
         if (!(username in usersInThisSession)) {
-            // WHAT's IN THE USER?
-            usersInThisSession[username] = {
-                name: username,
-                messageCount: 0,
-                };
+            putUserIntoObject(usersInThisSession, tags);
         } 
         
         // counts messages written by the user
@@ -172,8 +162,19 @@ client.on('message', (channel, tags, message, self) => {
 
         // save that as a json file then
         saveUser(username);
+        
     }
 });
+
+function putUserIntoObject(object, tags){
+    // WHAT's IN THE USER?
+    object[tags.username] = {
+        name: tags.username,
+        messageCount: 0,
+        color: tags.color
+        };
+
+}
 
 // COMMUNICATION WITH THE FRONTEND
 

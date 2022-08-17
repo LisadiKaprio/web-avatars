@@ -26,8 +26,9 @@ class Overworld{
         // place game object
         this.userAvatars[user.name] = new GameObject({
             name: user.name,
+            color: user.color,
             x: Math.random() * this.canvas.width,
-            y: 1,
+            y: 950,
             src: "images/chars/1.png"
         })
         this.userAvatars[user.name].mount(this);
@@ -77,9 +78,15 @@ class Overworld{
             // clear canvas
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+            // aligns all 
+            this.ctx.textAlign = 'center';
+
             for(const userAvatar of Object.values(this.userAvatars)){
                 userAvatar.update();
                 userAvatar.sprite.draw(this.ctx);
+                this.ctx.fillStyle = userAvatar.color;
+                this.ctx.font = 'bold 16px VictorMono-Medium';
+                this.ctx.fillText(userAvatar.name, userAvatar.x + (75/2), userAvatar.y + 75 + 3);
             }
     
     
