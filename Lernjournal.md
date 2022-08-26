@@ -438,3 +438,33 @@ for (const [emote, charPositions] of Object.entries(tags.emotes)) {
     console.log(${key}: ${value});
 }
 ```
+
+
+# 26/08/2022
+* ```
+ctx.drawImage(currentPicture,
+                // left cut, right cut,
+                frameX * this.cutSize, frameY * this.cutSize,
+                // size of the cut on x and y
+                this.cutSize, this.cutSize,
+                // position comes in here
+                x, y,
+                // display size
+                this.displaySize, this.displaySize);
+
+
+            if(this.maskIsLoaded){
+            //     // ctx.save();
+                ctx.globalCompositeOperation = "source-atop";
+            //     ctx.fillStyle = this.color;
+                ctx.drawImage(this.maskImage,
+                    // left cut, right cut,
+                    frameX * this.cutSize, frameY * this.cutSize,
+                    // size of the cut on x and y
+                    this.cutSize, this.cutSize,
+                    // position comes in here
+                    x, y,
+                    // display size
+                    this.displaySize, this.displaySize);
+                ctx.globalCompositeOperation = "source-over";
+```

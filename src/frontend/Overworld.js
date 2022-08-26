@@ -31,8 +31,8 @@ class Overworld{
             name: user.name,
             color: user.color,
             x: Math.random() * this.canvas.width,
-            y: 950,
-            src: "images/chars/1.png"
+            y: 850,
+            src: "images/chars/bunny.png"
         })
         this.userAvatars[user.name].mount(this);
 
@@ -95,7 +95,7 @@ class Overworld{
                 userAvatar.sprite.draw(this.ctx);
                 this.ctx.fillStyle = userAvatar.color;
                 this.ctx.font = 'bold 16px VictorMono-Medium';
-                this.ctx.fillText(userAvatar.name, userAvatar.x + (75/2), userAvatar.y + 75 + 3);
+                this.ctx.fillText(userAvatar.name, userAvatar.x + (userAvatar.sprite.displaySize/2), userAvatar.y + userAvatar.sprite.displaySize + 3);
             }
             // for(const emote of Object.values(this.renderedEmotes)){
             //     emote.update();

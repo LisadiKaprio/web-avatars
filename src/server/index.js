@@ -112,7 +112,7 @@ client.on('message', (channel, tags, message, self) => {
         const command = detectedCommand[1];
         const args = detectedCommand[2].trim();//.split(/\s+/)
 
-        if (tags.mod || tags.badges.broadcaster){
+        if (tags.mod || tags.badges?.broadcaster){
             // MOD/BROADCASTER COMMANDS
             // !startWeb
             if(message === clearUsers){

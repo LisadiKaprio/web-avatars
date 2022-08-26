@@ -45,19 +45,38 @@ class Sprite {
         }
 
         this.isEmote = config.isEmote || false;
+        this.cutSize = config.cutSize || 300;
+        this.displaySize = config.displaySize || 150;
 
         // configure animation and initial state
         this.animations = config.animations || {
-            "idle": [ [0,0] ]
+            "idle": [ [0,0], [0,1] ]
+
         }
         this.currentAnimation = config.currentAnimation || "idle";
         this.currentAnimationFrame = 0;
         // framerate of the animation
-        this.animationFrameLimit = config.animationFrameLimit || 16;
+        this.animationFrameLimit = config.animationFrameLimit || 25;
         this.animationFrameProgress = this.animationFrameLimit;
 
         // reference the game object
         this.gameObject = config.gameObject;
+
+
+        // mask
+        this.maskSrc = config.maskSrc || "images/chars/bunny-mask.png";
+        this.maskIsLoaded = false;
+        this.hasMask = false;
+        this.maskImage = new Image();
+        this.maskImage.src = this.maskSrc;
+        this.maskImage.onload = () => {
+            // we won't try to load until it's loaded
+            this.maskIsLoaded = true;
+            ImgCache[config.src] = {
+                image: this.image,
+                isGif: this.isGif,
+            }
+        }
     }
 
     // get current animation frame
@@ -89,37 +108,98 @@ class Sprite {
 
         const [frameX, frameY] = this.frame;
 
-        let frame = null
+        let currentPicture = null
         // if it's a gif
         if (this.isGif) {
             // and it's done loading next frame
             if (!this.image.loading) {
                 // draw that next frame
-                frame = this.image.image
+                currentPicture = this.image.image
             // if it's a gif and the next frame isn't loaded yet
             // but the previous frame is still available
             } else if (this.image.lastFrame !== null) {
                 // draw previous frame
-                frame = this.image.lastFrame.image
+                currentPicture = this.image.lastFrame.image
             }
         // if it's not a gif, and it's done loading
         } else if(this.isLoaded){
             // draw that
-            frame = this.image
+            currentPicture = this.image
         }
         
         // if there is something avaiable to be drawn
-        if (frame) {
-            ctx.drawImage(frame,
+        if (currentPicture) {
+            ctx.drawImage(currentPicture,
+            // left cut, right cut,
+            frameX * this.cutSize, frameY * this.cutSize,
+            // size of the cut on x and y
+            this.cutSize, this.cutSize,
+            // position comes in here
+            x, y,
+            // display size
+            this.displaySize, this.displaySize);
+
+
+        if(this.maskIsLoaded){
+        //     // ctx.save();
+            ctx.globalCompositeOperation = "source-atop";
+        //     ctx.fillStyle = this.color;
+            ctx.drawImage(this.maskImage,
                 // left cut, right cut,
-                frameX * 150, frameY * 150,
+                frameX * this.cutSize, frameY * this.cutSize,
                 // size of the cut on x and y
-                150,150,
+                this.cutSize, this.cutSize,
                 // position comes in here
                 x, y,
                 // display size
-                75, 75)
+                this.displaySize, this.displaySize);
+            ctx.globalCompositeOperation = "source-over";
         }
+
+            // ctx.save();
+            // ctx.globalCompositeOperation = "destination-over";
+            // ctx.drawImage(currentPicture,
+            //     // left cut, right cut,
+            //     frameX * this.cutSize, frameY * this.cutSize,
+            //     // size of the cut on x and y
+            //     this.cutSize, this.cutSize,
+            //     // position comes in here
+            //     x, y,
+            //     // display size
+            //     this.displaySize, this.displaySize);
+            // if(this.maskIsLoaded){
+            //     // ctx.save();
+            //     // ctx.globalCompositeOperation = "source-in";
+            //     ctx.fillStyle = this.color;
+            //     ctx.drawImage(this.maskImage,
+            //         // left cut, right cut,
+            //         frameX * this.cutSize, frameY * this.cutSize,
+            //         // size of the cut on x and y
+            //         this.cutSize, this.cutSize,
+            //         // position comes in here
+            //         x, y,
+            //         // display size
+            //         this.displaySize, this.displaySize);
+            //     ctx.globalCompositeOperation = "source-in";
+            //     ctx.fillRect(0, 0, this.maskImage.width, this.maskImage.height);
+            //     // ctx.restore();
+            // }
+            // // ctx.save();
+            // ctx.restore();
+
+        }
+
+        
+        // ctx.drawImage(mask, 0, 0)
+        // ctx.fillStyle = color
+        // ctx.globalCompositeOperation = "source-in"
+        // ctx.fillRect(0, 0, mask.width, mask.height)
+        // ctx.restore()
+        // ctx.save()
+        // ctx.globalCompositeOperation = "destination-over"
+        // ctx.drawImage(bitmap, 0, 0)
+        // ctx.restore()
+
         this.updateAnimationProgress();
     }
 }
