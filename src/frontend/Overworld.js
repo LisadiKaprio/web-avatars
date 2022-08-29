@@ -32,7 +32,8 @@ class Overworld{
             color: user.color,
             x: Math.random() * this.canvas.width,
             y: 850,
-            src: "images/chars/bunny.png"
+            src: "images/chars/bunny.png",
+            mask: "images/chars/bunny-mask.png"
         })
         this.userAvatars[user.name].mount(this);
 

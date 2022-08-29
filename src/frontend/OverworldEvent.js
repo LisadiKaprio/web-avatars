@@ -33,6 +33,26 @@ class OverworldEvent{
 
     }
 
+    // beginTalking(resolve){
+    //     // receive communication on which character 
+    //     const who = this.overworld.userAvatars[ this.event.who ];
+    //     // initiate walking
+    //     who.startBehavior({
+    //         overworld: this.overworld
+    //     }, {
+    //         type: "beginTalking"
+    //     })
+    //     const completeHandler = e => {
+    //         if(e.detail.whoName === this.event.who){
+    //             document.removeEventListener("AvatarBeginTalkingComplete", completeHandler);
+    //             resolve();
+    //         }
+    //     }
+
+    //     document.addEventListener("AvatarBeginTalkingComplete", completeHandler)
+
+    // }
+
     walk(resolve){
         // receive communication on which character should walk
         const who = this.overworld.userAvatars[ this.event.who ];
