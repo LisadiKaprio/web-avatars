@@ -11,7 +11,24 @@ class GameObject {
         this.sprite = new Sprite({
             gameObject: this,
             src: config.src || "./images/chars/1.png",
-            animations: config.animations || {"idle": [ [0,0], [1, 0] ]}
+            animations: config.animations || {
+                "idle": [ [0,0], [1, 0] ],
+
+                "begin talking": [ [1,0], [1,1], [1,2] ],
+                "talking": [ [2,0], [2,1] ],
+                "stop talking": [ [1,2], [1,1], [1,0] ],
+
+                "begin gaining item": [ [1,0], [1,1], [1,3] ],
+                "gaining item": [ [2,2], [2,3] ],
+                "stop gaining item": [ [1,3], [1,1], [1,0] ],
+                
+                "consuming item": [ [0,2], [3,0], [3,1], [3,2], [3,3], [3,2], [3,1], [3,0], [0,2],],
+
+                "hugging left": [ [4,0], [4,1] ],
+                "hugging right": [ [4,2], [4,3] ],
+
+
+            }
         });
         this.color = config.color || 'black';
 
