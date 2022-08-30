@@ -468,3 +468,20 @@ ctx.drawImage(currentPicture,
                     this.displaySize, this.displaySize);
                 ctx.globalCompositeOperation = "source-over";
 ```
+
+# 30/08/2022
+
+[x] communicate the fact that a user wrote a new message to the frontend
+[x] make a character animation play when it receives the message event
+  [] then go back to usual walking routine
+[] make the animations queue up for if another message was written while prev animation was playing
+[] +15 xp animation play above character's head
+[] characters hold experience points
+
+idle: walk, stand for bit, walk, loop-->
+    + idle animation
+talking: stops, plays animation, continues routine
+    + pop up notification "+15 xp" and sparkles
+performign activity (mine, hunt, fish, gather): goes to specific coordinates, stops, idle animation, but there's pop up animation timer/particles (udochka, bow and arrow),
+at the end of activity: receives an item, plays animation receiving item, pop up animation of the item and sparkles. then goes back to old routine.
+talking animation possible in the middle of performing activity.

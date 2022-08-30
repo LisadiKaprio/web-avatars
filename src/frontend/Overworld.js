@@ -39,7 +39,7 @@ class Overworld{
 
     }
 
-    update(users, emoteArray){
+    update(users, emoteArray, messagesObject){
         // difference between value and keys:
         // value = {name: 'kirinokirino', messageCount: 2}
         // key = kirinokirino
@@ -48,13 +48,24 @@ class Overworld{
             if(!this.userAvatars[user]){
                 this.createNewUserAvatar(users[user]);
             }
+            
+            // check if user wrote a message
+            if(messagesObject[user]){
+                //console.log(this.userAvatars[user]);
+                // add new behavior loop
+                this.userAvatars[user].behaviourLoop = [
+                    { type: "talking" }
+                ];
+                this.userAvatars[user].behaviourLoopIndex = 0;
+                // this.userAvatars[user].mount(this);
+            }
         };
-        //this.renderedEmotes = [];
         for (let i = 0; i < emoteArray.length; i++) {
             this.createNewEmote(emoteArray[i].id, this.userAvatars[emoteArray[i].name].x, this.userAvatars[emoteArray[i].name].y);
             
             this.renderedEmotes[i].mount(this);
         }
+
     }
     createNewEmote(emoteId, userAvatarx, userAvatary){
         // make the name match the index of this new emote, so the behaviours get communicated later on
@@ -68,12 +79,17 @@ class Overworld{
                 { type: "physics" },
 
             ],
-            animations: {"idle": [ [0,0] ]},
+            animations: {
+                "idle": new Animation({
+                    frames: [ [0,0] ],
+                    doesLoop: true,
+                }),},
             speedPhysicsX: Math.random()*6-3,
             speedPhysicsY: -(Math.random()*5),
             dragPhysicsY: -0.02,
             stepsTilTarget: 0
         }))
+        console.log(this.userAvatars);
     }
 
     // get (normal twitchtv) emotes

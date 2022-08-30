@@ -1,3 +1,4 @@
+'use strict'
 class OverworldEvent{
     constructor({overworld, event}){
         this.overworld = overworld;
@@ -33,26 +34,6 @@ class OverworldEvent{
 
     }
 
-    // beginTalking(resolve){
-    //     // receive communication on which character 
-    //     const who = this.overworld.userAvatars[ this.event.who ];
-    //     // initiate walking
-    //     who.startBehavior({
-    //         overworld: this.overworld
-    //     }, {
-    //         type: "beginTalking"
-    //     })
-    //     const completeHandler = e => {
-    //         if(e.detail.whoName === this.event.who){
-    //             document.removeEventListener("AvatarBeginTalkingComplete", completeHandler);
-    //             resolve();
-    //         }
-    //     }
-
-    //     document.addEventListener("AvatarBeginTalkingComplete", completeHandler)
-
-    // }
-
     walk(resolve){
         // receive communication on which character should walk
         const who = this.overworld.userAvatars[ this.event.who ];
@@ -77,6 +58,27 @@ class OverworldEvent{
         document.addEventListener("AvatarWalkingComplete", completeHandler)
 
     }
+
+    talking(resolve){
+        // receive communication on which character 
+        const who = this.overworld.userAvatars[ this.event.who ];
+        // initiate walking
+        who.startBehavior({
+            overworld: this.overworld
+        }, {
+            type: "talking"
+        })
+        const completeHandler = e => {
+            if(e.detail.whoName === this.event.who){
+                document.removeEventListener("AvatarBeginTalkingComplete", completeHandler);
+                resolve();
+            }
+        }
+        document.addEventListener("AvatarBeginTalkingComplete", completeHandler);
+
+
+    }
+
 
     physics(resolve){
         // receive communication on which emote should be animated
@@ -111,6 +113,7 @@ class OverworldEvent{
             // walk(resolve)
             // if(this[this.event.type] != undefined)
             this[this.event.type](resolve);
+            /////console.log(this.event);
         })
     }
 }

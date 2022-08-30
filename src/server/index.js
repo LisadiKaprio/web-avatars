@@ -28,6 +28,7 @@ const users = loadUsers();
 let usersInThisSession = {};
 
 let newEmotesArray = [];
+let newMessagesObject = {};
 
 function loadUsers() {
     const users = {};
@@ -180,6 +181,9 @@ client.on('message', (channel, tags, message, self) => {
         users[username].messageCount += 1;
         usersInThisSession[username].messageCount += 1;
 
+        // this user wrote a message!
+        newMessagesObject[username] = {};
+
         // save that as a json file then
         saveUser(username);
         
@@ -217,9 +221,11 @@ app.get('/', (req, res) => {
 app.get('/users', (req, res) => {
     res.send({
         users: usersInThisSession, 
-        emotes: newEmotesArray
+        emotes: newEmotesArray,
+        messages: newMessagesObject
     })
     newEmotesArray = [];
+    newMessagesObject = {};
 })
 
 // (: 

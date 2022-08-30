@@ -1,3 +1,4 @@
+'use strict'
 
 
 async function main () {
@@ -15,18 +16,21 @@ async function main () {
     let usersInFrontend = {};
 
     let newEmotesArray = [];
+    let newMessagesObject = {};
+
 
     async function pollForDataAsync () {
         // send a request to the server and store data in some variable
         try {
             const resp = await fetch('/users')
-            let {users, emotes} = await resp.json()
+            let {users, emotes, messages} = await resp.json()
             
             usersInFrontend = users;
             newEmotesArray = emotes;
+            newMessagesObject = messages;
 
             // redraw
-            overworld.update(usersInFrontend, newEmotesArray);
+            overworld.update(usersInFrontend, newEmotesArray, newMessagesObject);
 
         } catch (error) {
             console.error(error)

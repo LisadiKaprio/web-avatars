@@ -1,5 +1,7 @@
 'use strict'
 
+
+
 class GameObject {
     constructor(config){
         // username
@@ -14,7 +16,35 @@ class GameObject {
             src: config.src,
             mask: config.mask,
             color: this.color,
-            animations: config.animations || {"idle": [ [0,0], [1, 0] ]}
+            animations: config.animations || {
+                "idle": new Animation({
+                    frames: [ [0,0], [1,0] ],
+                    doesLoop: true,
+                }),
+                "talking": new Animation({
+                    frames: [ //[0,1], 
+                    [1,1], 
+                    [2,1], // begin talking
+                    [0,2], [1,2], [0,2], [1,2], [0,2], [1,2], [0,2], [1,2], [0,2], [1,2], [0,2], [1,2], [0,2], [1,2],  // talking
+                    [2,1], [1,1], [0,1] ], // stop talking
+                    doesLoop: false,
+                })
+
+                // "begin talking": [ [1,0], [1,1], [1,2] ],
+                // "talking": [ [2,0], [2,1] ],
+                // "stop talking": [ [1,2], [1,1], [1,0] ],
+
+                // "begin gaining item": [ [1,0], [1,1], [1,3] ],
+                // "gaining item": [ [2,2], [2,3] ],
+                // "stop gaining item": [ [1,3], [1,1], [1,0] ],
+                
+                // "consuming item": [ [0,2], [3,0], [3,1], [3,2], [3,3], [3,2], [3,1], [3,0], [0,2],],
+
+                // "hugging left": [ [4,0], [4,1] ],
+                // "hugging right": [ [4,2], [4,3] ],
+
+
+            }
         });
 
         
@@ -39,6 +69,14 @@ class GameObject {
         // default direction
         this.direction = "left";
 
+        this.idleBehaviour = [
+            { type: "walk", direction: "left"},
+            // could use small time value to have them run around chaotically!
+            { type: "stand", direction: "left", time: Math.random()*this.standTime},
+            { type: "walk", direction: "right"},
+            { type: "stand", direction: "right", time: Math.random()*this.standTime},
+        ];
+
 
         // https://www.youtube.com/watch?v=e144CXGy2mc part 8
         this.behaviourLoop = config.behaviourLoop || [
@@ -56,16 +94,15 @@ class GameObject {
     mount(overworld){
         setTimeout(() => {
             this.doBehaviorEvent(overworld);
-        }, 10)
+        }, )
     }
 
 
     update(){
         if(this.behaviourLoop[this.behaviourLoopIndex].type === "physics"){
             this.updateEmotePosition();
-
         }
-        if(this.stepsTilTarget > 0){
+        if(this.behaviourLoop[this.behaviourLoopIndex].type === "walk" && this.stepsTilTarget > 0){
             this.updatePosition();
             //this.updateSprite(state);
         } 
@@ -80,17 +117,11 @@ class GameObject {
         this.stepsTilTarget -= 1;
 
         if(this.stepsTilTarget <= 0){
-            
             // We finished the walk!
 
             // in-browser class
             // this construction will be reused, so it can become a separate function in some separate utils.js file
-            const event = new CustomEvent("AvatarWalkingComplete", {
-                detail: {
-                    whoName: this.name
-                }
-            });
-            document.dispatchEvent(event);
+            this.emitEvent("AvatarWalkingComplete");
         }
     }
 
@@ -101,9 +132,9 @@ class GameObject {
         this.y += this.speedPhysicsY;
         this.speedPhysicsY -= this.dragPhysicsY;
         //debugger;
-
-
     }
+
+
 
     startBehavior(state, behavior){
         // Set character direction to whatever behavior has
@@ -117,21 +148,23 @@ class GameObject {
         }
         if(behavior.type === "stand"){
             setTimeout(() => {
-                const event = new CustomEvent("AvatarStandingComplete", {
-                    detail: {
-                        whoName: this.name
-                    }
-                });
-                document.dispatchEvent(event);
+                this.emitEvent("AvatarStandingComplete");
             }, behavior.time);
         }
-        // if(behavior.type === "physics"){
-        //     // if we want collision, the stop for it comes here
+        if(behavior.type === "talking"){
+            // play out all the frames of animation, then switch to next behavior
+            this.sprite.currentAnimation = "talking";
+            
+        }
+    }
 
-        //     // Ready to walk
-        //     // resets step
-        //     this.stepsTilTarget = Math.random()*this.walkingTime;
-        // }
+    emitEvent(name){
+        const event = new CustomEvent(name, {
+            detail: {
+                whoName: this.name
+            }
+        });
+        document.dispatchEvent(event);
 
     }
 
@@ -141,7 +174,7 @@ class GameObject {
         
         // Don't execute this function if there's an overarching event happening
         // or if my behavior is empty
-        if(overworld.isCutscenePlaying || this.behaviourLoop.length === 0 || !this.sprite.isLoaded){
+        if(overworld.isCutscenePlaying || this.behaviourLoop.length === 0 /* || !this.sprite.isLoaded */){
             return;
         }
 

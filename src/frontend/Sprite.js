@@ -4,6 +4,13 @@
 // saves all the loaded images so they won't have to be loaded anew later
 const ImgCache = {}
 
+class Animation {
+    constructor(config){
+        this.frames = config.frames || [];
+        this.doesLoop = config.doesLoop;
+    }
+}
+
 class Sprite {
     constructor(config){
         // this happens when the ImageUtil finishes loading:
@@ -24,7 +31,11 @@ class Sprite {
 
         // configure animation and initial state
         this.animations = config.animations || {
-            "idle": [ [0,0], [0,1] ]
+            //"idle": [ [0,0], [1,0] ]
+            "idleDefault": new Animation({
+                frames: [ [0,0], [1,0] ],
+                doesLoop: true,
+            })
 
         }
         this.currentAnimation = config.currentAnimation || "idle";
@@ -39,7 +50,8 @@ class Sprite {
 
     // get current animation frame
     get frame(){
-        return this.animations[this.currentAnimation][this.currentAnimationFrame];
+        // return this.animations[this.currentAnimation][this.currentAnimationFrame];
+        return this.animations[this.currentAnimation].frames[this.currentAnimationFrame];
     }
 
     updateAnimationProgress(){
@@ -55,7 +67,17 @@ class Sprite {
         this.currentAnimationFrame += 1;
 
         if(this.frame == undefined){
-            this.currentAnimationFrame = 0;
+            if(this.animations[this.currentAnimation].doesLoop){
+                this.currentAnimationFrame = 0;
+            }
+            else{
+                console.log(this.gameObject);
+                this.gameObject.emitEvent("AvatarBeginTalkingComplete");
+                this.gameObject.behaviourLoop = this.gameObject.idleBehaviour;
+                this.gameObject.behaviourLoopIndex = 0;
+                this.currentAnimation = "idle";
+                this.currentAnimationFrame = 0;
+            }
         }
     }
 
@@ -76,6 +98,9 @@ class Sprite {
         if (image) {
             ctx.drawImage(image,
                 // left cut, right cut,
+                // had a bug where frameX and frameY were switched around unexpectedly
+                // might need to go back and fix again if bug reoccurs
+                // (no)
                 frameX * this.cutSize, frameY * this.cutSize,
                 // size of the cut on x and y
                 this.cutSize, this.cutSize,
