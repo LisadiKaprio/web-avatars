@@ -185,7 +185,6 @@ class GameObject {
 
     // do my own behavior
     async doBehaviorEvent(overworld){
-        this.emitEvent("StartBehavior");
         
         // Don't execute this function if there's an overarching event happening
         // or if my behavior is empty
