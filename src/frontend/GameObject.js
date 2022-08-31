@@ -82,7 +82,7 @@ class GameObject {
         };
 
         // https://www.youtube.com/watch?v=e144CXGy2mc part 8
-        this.behaviourLoop = config.behaviourLoop || this.behaviours.idle;
+        this.behaviourLoop = config.behaviourLoop || this.behaviours[BEHAVIOUR.IDLE];
         this.behaviourLoopIndex = 0;
 
         // https://youtu.be/kfSTLrCoFxk?t=835
