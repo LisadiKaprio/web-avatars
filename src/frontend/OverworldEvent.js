@@ -25,13 +25,13 @@ class OverworldEvent{
         const completeHandler = e => {
             if(e.detail.whoName === this.event.who){
                 document.removeEventListener("AvatarStandingComplete", completeHandler);
+                document.removeEventListener("BehaviourLoopChanged", completeHandler);
                 resolve();
             }
         }
 
-        document.addEventListener("AvatarStandingComplete", completeHandler)
-
-
+        document.addEventListener("AvatarStandingComplete", completeHandler);
+        document.addEventListener("BehaviourLoopChanged", completeHandler);
     }
 
     walk(resolve){
@@ -51,12 +51,13 @@ class OverworldEvent{
         const completeHandler = e => {
             if(e.detail.whoName === this.event.who){
                 document.removeEventListener("AvatarWalkingComplete", completeHandler);
+                document.removeEventListener("BehaviourLoopChanged", completeHandler);
                 resolve();
             }
         }
 
         document.addEventListener("AvatarWalkingComplete", completeHandler)
-
+        document.addEventListener("BehaviourLoopChanged", completeHandler);
     }
 
     talking(resolve){
@@ -70,13 +71,13 @@ class OverworldEvent{
         })
         const completeHandler = e => {
             if(e.detail.whoName === this.event.who){
-                document.removeEventListener("AvatarBeginTalkingComplete", completeHandler);
+                document.removeEventListener("AvatarTalkingComplete", completeHandler);
+                document.removeEventListener("BehaviourLoopChanged", completeHandler);
                 resolve();
             }
         }
-        document.addEventListener("AvatarBeginTalkingComplete", completeHandler);
-
-
+        document.addEventListener("AvatarTalkingComplete", completeHandler);
+        document.addEventListener("BehaviourLoopChanged", completeHandler);
     }
 
 
@@ -97,12 +98,13 @@ class OverworldEvent{
         const completeHandler = e => {
             if(e.detail.whoName === this.event.who){
                 document.removeEventListener("EmoteAnimationComplete", completeHandler);
+                document.removeEventListener("BehaviourLoopChanged", completeHandler);
                 resolve();
             }
         }
 
-        document.addEventListener("EmoteAnimationComplete", completeHandler)
-
+        document.addEventListener("EmoteAnimationComplete", completeHandler);
+        document.addEventListener("BehaviourLoopChanged", completeHandler);
     }
 
     // kicks off event
