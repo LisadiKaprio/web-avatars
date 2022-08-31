@@ -183,6 +183,7 @@ client.on('message', (channel, tags, message, self) => {
 
         // this user wrote a message!
         newMessagesObject[username] = {};
+        users[username].xp += 15;
 
         // save that as a json file then
         saveUser(username);
@@ -195,7 +196,8 @@ function putUserIntoObject(object, tags){
     object[tags.username] = {
         name: tags.username,
         messageCount: 0,
-        color: tags.color
+        color: tags.color,
+        xp: 0,
         };
 
 }

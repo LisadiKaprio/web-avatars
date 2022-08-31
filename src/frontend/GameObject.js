@@ -1,7 +1,5 @@
 'use strict'
 
-
-
 class GameObject {
     constructor(config){
         // username
@@ -56,13 +54,9 @@ class GameObject {
 
         this.dragPhysicsY = config.dragPhysicsY || 0;
 
-        this.walkingTime = config.walkingTime || 69;
+        this.walkingTime = config.walkingTime || 300;
         this.standTime = config.standTime || 4000;
-        this.directionalUpdate = config.directionalUpdate 
-        // podbrasivaetsya 
-        // 
-        // complete disappear
-        || {
+        this.directionalUpdate = config.directionalUpdate || {
             "left": ["x", -this.speed],
             "right": ["x", this.speed]
         };
@@ -87,6 +81,9 @@ class GameObject {
             { type: "stand", direction: "right", time: Math.random()*this.standTime},
         ]
         this.behaviourLoopIndex = 0;
+
+        // https://youtu.be/kfSTLrCoFxk?t=835
+        this.retryTimeout = null;
     }
 
     // wait for what's going on first, any overarching cutsene event or whatever
@@ -110,7 +107,15 @@ class GameObject {
 
     updatePosition(){
         // define x as property and -1 or 1 as change
-        const [property, change] = this.directionalUpdate[this.direction];
+        let [property, change] = this.directionalUpdate[this.direction];
+        if(this.x >= 1920){
+            this.direction = "left";
+            console.log("turning left");
+        }
+        if(this.x <= 0){
+            this.direction = "right";
+            console.log("turning right");
+        }
         // actually move on x?
         this[property] += change;
         // change the value so it knows it took a step
@@ -175,6 +180,12 @@ class GameObject {
         // Don't execute this function if there's an overarching event happening
         // or if my behavior is empty
         if(overworld.isCutscenePlaying || this.behaviourLoop.length === 0 /* || !this.sprite.isLoaded */){
+            if(this.retryTimeout) {
+                clearTimeout(this.retryTimeout);
+            }
+            this.retryTimeout = setTimeout(() => {
+                this.doBehaviorEvent(overworld);
+            }, 1000)
             return;
         }
 
