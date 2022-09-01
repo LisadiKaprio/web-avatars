@@ -1,5 +1,10 @@
 'use strict'
 
+const BEHAVIOUR = {
+    IDLE: "idle",
+    TALK: "talk",
+};
+
 class GameObject {
     constructor(config){
         // username
@@ -63,27 +68,31 @@ class GameObject {
         // default direction
         this.direction = "left";
 
-        this.idleBehaviour = [
-            { type: "walk", direction: "left"},
-            // could use small time value to have them run around chaotically!
-            { type: "stand", direction: "left", time: Math.random()*this.standTime},
-            { type: "walk", direction: "right"},
-            { type: "stand", direction: "right", time: Math.random()*this.standTime},
-        ];
-
+        this.behaviours = {
+            [BEHAVIOUR.IDLE]: [
+                { type: "walk", direction: "left"},
+                // could use small time value to have them run around chaotically!
+                { type: "stand", direction: "left", time: Math.random()*this.standTime},
+                { type: "walk", direction: "right"},
+                { type: "stand", direction: "right", time: Math.random()*this.standTime},
+            ],
+            [BEHAVIOUR.TALK]: [
+                { type: "talking" },
+            ],
+        };
 
         // https://www.youtube.com/watch?v=e144CXGy2mc part 8
-        this.behaviourLoop = config.behaviourLoop || [
-            { type: "walk", direction: "left"},
-            // could use small time value to have them run around chaotically!
-            { type: "stand", direction: "left", time: Math.random()*this.standTime},
-            { type: "walk", direction: "right"},
-            { type: "stand", direction: "right", time: Math.random()*this.standTime},
-        ]
+        this.behaviourLoop = config.behaviourLoop || this.behaviours[BEHAVIOUR.IDLE];
         this.behaviourLoopIndex = 0;
 
         // https://youtu.be/kfSTLrCoFxk?t=835
         this.retryTimeout = null;
+    }
+
+    changeBehaviour(behaviour) {
+        this.emitEvent("BehaviourLoopChanged");
+        this.behaviourLoop = this.behaviours[behaviour];
+        this.behaviourLoopIndex = 0;
     }
 
     // wait for what's going on first, any overarching cutsene event or whatever

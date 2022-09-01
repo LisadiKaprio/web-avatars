@@ -71,10 +71,8 @@ class Sprite {
                 this.currentAnimationFrame = 0;
             }
             else{
-                console.log(this.gameObject);
-                this.gameObject.emitEvent("AvatarBeginTalkingComplete");
-                this.gameObject.behaviourLoop = this.gameObject.idleBehaviour;
-                this.gameObject.behaviourLoopIndex = 0;
+                this.gameObject.emitEvent("AvatarTalkingComplete");
+                this.gameObject.changeBehaviour(BEHAVIOUR.IDLE);
                 this.currentAnimation = "idle";
                 this.currentAnimationFrame = 0;
             }

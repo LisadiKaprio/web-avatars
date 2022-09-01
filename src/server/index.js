@@ -21,6 +21,7 @@ const clearUsers = 'clearUsers';
 
 // = = = construction: users database in data/users = = =
 
+const USER_ALLOW_LIST = []
 const DATA_DIR = './data';
 const USER_DATA_DIR =  DATA_DIR + '/users';
 
@@ -34,8 +35,10 @@ function loadUsers() {
     const users = {};
     const files = fs.readdirSync(USER_DATA_DIR);
     for (const file of files) {
-        const user = JSON.parse(fs.readFileSync(`${USER_DATA_DIR}/${file}`));
-        users[user.name] = user;
+        const user = JSON.parse(fs.readFileSync(`${USER_DATA_DIR}/${file}`))
+        if (USER_ALLOW_LIST.length === 0 || USER_ALLOW_LIST.includes(user.name)) {
+            users[user.name] = user;
+        }
     };
     return users;
 };
@@ -107,6 +110,10 @@ client.on('message', (channel, tags, message, self) => {
     // it extracts what's in {} out of what's on the right
     const { username } = tags;
     
+    if (USER_ALLOW_LIST.length > 0 && !USER_ALLOW_LIST.includes(username)) {
+        return
+    }
+    
     const detectedCommand = message.match(/^!([a-z]+)($|\s.*)/)
 
     if (detectedCommand) {
@@ -151,7 +158,7 @@ client.on('message', (channel, tags, message, self) => {
         // first, save the user in the db if they weren't yet
         if (!(username in users)) {
             putUserIntoObject(users, tags);
-        } 
+        }
 
         // same, but for new users in current session aka current stream
         if (!(username in usersInThisSession)) {
@@ -232,5 +239,5 @@ app.get('/users', (req, res) => {
 
 // (: 
 app.listen(port, () => {
-    console.log(`Web-Avatars listening on port ${port}`)
+    console.log(`Web-Avatars listening on http://localhost:${port}`)
 })

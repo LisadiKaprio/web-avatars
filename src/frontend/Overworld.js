@@ -51,13 +51,7 @@ class Overworld{
             
             // check if user wrote a message
             if(messagesObject[user]){
-                //console.log(this.userAvatars[user]);
-                // add new behavior loop
-                this.userAvatars[user].behaviourLoop = [
-                    { type: "talking" }
-                ];
-                this.userAvatars[user].behaviourLoopIndex = 0;
-                // this.userAvatars[user].mount(this);
+                this.userAvatars[user].changeBehaviour(BEHAVIOUR.TALK);
             }
         };
         for (let i = 0; i < emoteArray.length; i++) {
