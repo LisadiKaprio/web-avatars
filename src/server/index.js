@@ -170,9 +170,8 @@ client.on("message", (channel, tags, message, self) => {
             );
           }
         } else {
-          // !do_stuff args
-          console.log(usersInThisSession);
-          console.log(`${username} : ${command} ${args}`);
+          // Pass all the unknown commands (starting with ! ) to the frontend
+          // in hopes that it knows what to do with them.
           if (usersInThisSession[username]) {
             if (!usersInThisSession[username].unhandledCommands) {
               usersInThisSession[username].unhandledCommands = [
@@ -240,6 +239,9 @@ app.get("/users", (req, res) => {
     emotes: newEmotesArray,
     messages: newMessagesObject,
   });
+  for (let user of Object.values(usersInThisSession)) {
+    user.unhandledCommands = [];
+  }
   newEmotesArray = [];
   newMessagesObject = {};
 });
