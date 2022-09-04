@@ -117,7 +117,7 @@ class GameObject {
     updatePosition(){
         // define x as property and -1 or 1 as change
         let [property, change] = this.directionalUpdate[this.direction];
-        if(this.x >= 1920){
+        if(this.x >= 1920-150){
             this.direction = "left";
             console.log("turning left");
         }

@@ -8,4 +8,6 @@ Homework for DE:HIVE, 6th Semester, Web-Development.
 
 To configure, edit values in "src/server/index.js".
 
+Use as Browser Source in your OBS: set the url to "localhost:2501", the width to 1920, the height to 1080, check the box "use custom frame rate" and set the frame rate to 60.
+
 I will take some gameplay from here: https://github.com/Zutatensuppe/farm-game Thanks para!
