@@ -33,10 +33,7 @@ class Sprite {
     this.animations = config.animations || {
       //"idle": [ [0,0], [1,0] ]
       idle: new Animation({
-        frames: [
-          [0, 0],
-          [1, 0],
-        ],
+        frames: [[0, 0]],
         doesLoop: true,
       }),
     };
@@ -71,6 +68,10 @@ class Sprite {
 
     if (this.frame == undefined) {
       if (this.animations[this.currentAnimation].doesLoop) {
+        this.currentAnimationFrame = 0;
+      } else if (this.gameObject.actionTime) {
+        this.gameObject.changeBehaviour();
+        this.currentAnimation = "idle";
         this.currentAnimationFrame = 0;
       } else {
         this.gameObject.emitEvent("AvatarTalkingComplete");

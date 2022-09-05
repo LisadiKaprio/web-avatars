@@ -18,9 +18,7 @@ class Overworld {
   }
 
   createNewUserAvatar(user) {
-    // place game object
-    let avatar = new GameObject({
-      world: this,
+    let avatar = new Avatar({
       name: user.name,
       color: user.color,
       x: Math.random() * this.canvas.width,
@@ -29,7 +27,6 @@ class Overworld {
       mask: "images/chars/bunny-mask.png",
     });
     this.userAvatars[user.name] = avatar;
-    avatar.doBehaviorEvent();
   }
 
   update(users, emoteArray, messagesObject) {
@@ -44,7 +41,7 @@ class Overworld {
 
       // check if user wrote a message
       if (messagesObject[user]) {
-        this.userAvatars[user].changeBehaviour(BEHAVIOUR.TALK);
+        this.userAvatars[user].changeBehaviour("talk");
       }
     }
     for (let i = 0; i < emoteArray.length; i++) {
@@ -56,28 +53,15 @@ class Overworld {
     }
   }
   createNewEmote(emoteId, userAvatarx, userAvatary) {
-    // make the name match the index of this new emote, so the behaviours get communicated later on
-    let id = this.renderedEmotes.length;
-    let emote = new GameObject({
-      world: this,
-      name: id,
+    let emote = new Emote({
       x: userAvatarx + 75 / 2,
       y: userAvatary - 25,
       src: this.getEmoteImg(emoteId),
-      behaviourLoop: [{ type: "physics" }],
-      animations: {
-        idle: new Animation({
-          frames: [[0, 0]],
-          doesLoop: true,
-        }),
-      },
       speedPhysicsX: Math.random() * 6 - 3,
       speedPhysicsY: -(Math.random() * 5),
       dragPhysicsY: -0.02,
-      stepsTilTarget: 0,
     });
     this.renderedEmotes.push(emote);
-    emote.doBehaviorEvent();
 
     console.log(this.userAvatars);
   }
