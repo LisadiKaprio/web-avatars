@@ -32,6 +32,26 @@ class Overworld {
           users[user],
           Math.random() * this.canvas.width
         );
+        this.logs.push({
+          text: `Hello ${user}, thanks for chatting!`,
+          color: users[user].color,
+        });
+      }
+
+      // check if user tried to perform an action
+      const commands = users[user].unhandledCommands;
+      for (const { command, args } of commands) {
+        if (command == "whoami") {
+          this.logs.push({
+            text: `you are ${user}`,
+            color: "blue",
+          });
+        } else {
+          this.logs.push({
+            text: `ERROR - ${user}: unknown command ${command}!`,
+            color: "red",
+          });
+        }
       }
 
       // check if user wrote a message
