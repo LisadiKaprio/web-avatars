@@ -16,18 +16,6 @@ class Overworld {
     this.isCutscenePlaying = false;
   }
 
-  createNewUserAvatar(user) {
-    let avatar = new Avatar({
-      name: user.name,
-      color: user.color,
-      x: Math.random() * this.canvas.width,
-      y: 850,
-      src: "images/chars/bunny.png",
-      mask: "images/chars/bunny-mask.png",
-    });
-    this.userAvatars[user.name] = avatar;
-  }
-
   update(users, emoteArray, messagesObject) {
     // difference between value and keys:
     // value = {name: 'kirinokirino', messageCount: 2}
@@ -35,56 +23,28 @@ class Overworld {
     // key is like 1 in array[1]
     for (const user of Object.keys(users)) {
       if (!this.userAvatars[user]) {
-        this.createNewUserAvatar(users[user]);
+        this.userAvatars[user] = createNewUserAvatar(
+          users[user],
+          Math.random() * this.canvas.width
+        );
       }
 
       // check if user wrote a message
       if (messagesObject[user]) {
         let avatar = this.userAvatars[user];
         avatar.changeBehaviour("talk");
-        this.createTextBubble(avatar, "+15 xp");
+        this.renderedBubbles.push(createTextBubble(avatar, "+15 xp"));
       }
     }
     for (let i = 0; i < emoteArray.length; i++) {
-      this.createNewEmote(
-        emoteArray[i].id,
-        this.userAvatars[emoteArray[i].name].x,
-        this.userAvatars[emoteArray[i].name].y
+      this.renderedEmotes.push(
+        createNewEmote(
+          emoteArray[i].id,
+          this.userAvatars[emoteArray[i].name].x,
+          this.userAvatars[emoteArray[i].name].y
+        )
       );
     }
-  }
-
-  createTextBubble(origin, contents) {
-    const bubble = new Bubble({
-      type: "text",
-      attachedTo: origin,
-      x: origin.x,
-      y: origin.y - 100,
-      text: "+15 xp",
-    });
-
-    this.renderedBubbles.push(bubble);
-  }
-
-  createNewEmote(emoteId, userAvatarx, userAvatary) {
-    let emote = new Emote({
-      x: userAvatarx + 75 / 2,
-      y: userAvatary - 25,
-      src: this.getEmoteImg(emoteId),
-      speedPhysicsX: Math.random() * 6 - 3,
-      speedPhysicsY: -(Math.random() * 5),
-      dragPhysicsY: -0.02,
-    });
-    this.renderedEmotes.push(emote);
-  }
-
-  // get (normal twitchtv) emotes
-  getEmoteImg(emoteId) {
-    return (
-      "https://static-cdn.jtvnw.net/emoticons/v2/" +
-      emoteId +
-      "/default/dark/2.0"
-    );
   }
 
   // game loop
@@ -134,4 +94,46 @@ class Overworld {
     this.startGameLoop();
     console.log("init");
   }
+}
+
+function createNewUserAvatar(user, x) {
+  let avatar = new Avatar({
+    name: user.name,
+    color: user.color,
+    x: x || 500,
+    y: 850,
+    src: "images/chars/bunny.png",
+    mask: "images/chars/bunny-mask.png",
+  });
+  return avatar;
+}
+
+function createTextBubble(origin, contents) {
+  const bubble = new Bubble({
+    type: "text",
+    attachedTo: origin,
+    x: origin.x,
+    y: origin.y - 100,
+    text: "+15 xp",
+  });
+  return bubble;
+}
+
+function createNewEmote(emoteId, userAvatarx, userAvatary) {
+  let emote = new Emote({
+    x: userAvatarx + 75 / 2,
+    y: userAvatary - 25,
+    src: getEmoteImg(emoteId),
+    speedPhysicsX: Math.random() * 6 - 3,
+    speedPhysicsY: -(Math.random() * 5),
+    dragPhysicsY: -0.02,
+  });
+  return emote;
+}
+
+// get (normal twitchtv) emotes
+function getEmoteImg(emoteId) {
+  return (
+    "https://static-cdn.jtvnw.net/emoticons/v2/" + emoteId + "/default/dark/2.0"
+  );
 }
