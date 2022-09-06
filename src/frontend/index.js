@@ -1,5 +1,7 @@
 "use strict";
 
+const UPDATE_PERIOD = 1000;
+
 async function main() {
   console.log("Frontend index.js loaded.");
 
@@ -30,7 +32,7 @@ async function main() {
     } catch (error) {
       console.error(error);
     }
-    setTimeout(pollForDataAsync, 1000);
+    setTimeout(pollForDataAsync, UPDATE_PERIOD);
   }
 
   await pollForDataAsync();

@@ -18,10 +18,11 @@ class Overworld {
 
     this.logs = [{ text: "Have a good day!", color: "red" }];
 
-    this.isCutscenePlaying = false;
+    this.time = 0;
   }
 
   update(users, emoteArray, messagesObject) {
+    this.time += UPDATE_PERIOD;
     // difference between value and keys:
     // value = {name: 'kirinokirino', messageCount: 2}
     // key = kirinokirino
@@ -30,7 +31,8 @@ class Overworld {
       if (!this.userAvatars[user]) {
         this.userAvatars[user] = createNewUserAvatar(
           users[user],
-          Math.random() * this.canvas.width
+          Math.random() * this.canvas.width,
+          this.time
         );
         this.logs.push({
           text: `Hello ${user}, thanks for chatting!`,
@@ -58,6 +60,7 @@ class Overworld {
       if (messagesObject[user]) {
         let avatar = this.userAvatars[user];
         avatar.changeBehaviour("talk");
+        avatar.lastChatTime = this.time;
         this.renderedBubbles.push(createTextBubble(avatar, "+15 xp"));
 
         // render the messages themselves on the random position of the entire screen.
@@ -113,6 +116,17 @@ class Overworld {
           userAvatar.x + userAvatar.sprite.displaySize / 2,
           userAvatar.y + userAvatar.sprite.displaySize + 3
         );
+        if (
+          userAvatar.isActive &&
+          this.time - userAvatar.lastChatTime >= 1000 * 60 * 20
+        ) {
+          userAvatar.changeBehaviour("sleep");
+          userAvatar.isActive = false;
+          this.logs.push({
+            text: `${userAvatar.name} hasn't written much in chat for a while now... Seems like they fell asleep!`,
+            color: "grey",
+          });
+        }
       }
 
       this.renderedEmotes = this.renderedEmotes.filter(
@@ -154,7 +168,7 @@ class Overworld {
   }
 }
 
-function createNewUserAvatar(user, x) {
+function createNewUserAvatar(user, x, time) {
   let avatar = new Avatar({
     name: user.name,
     color: user.color,
@@ -162,6 +176,7 @@ function createNewUserAvatar(user, x) {
     y: 850,
     src: "images/chars/bunny.png",
     mask: "images/chars/bunny-mask.png",
+    time: time,
   });
   return avatar;
 }

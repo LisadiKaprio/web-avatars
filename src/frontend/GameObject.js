@@ -218,11 +218,16 @@ class Avatar {
         { type: "stand" },
       ],
       talk: [{ type: "talking" }],
+      // TODO: think of an inactivity behaviour.
+      sleep: [{ type: "stand" }],
     };
 
     // https://www.youtube.com/watch?v=e144CXGy2mc part 8
     this.behaviourLoop = config.behaviourLoop || this.behaviours["idle"];
     this.behaviourLoopIndex = 0;
+
+    this.isActive = true;
+    this.lastChatTime = config.time;
   }
 
   changeBehaviour(behaviour) {
