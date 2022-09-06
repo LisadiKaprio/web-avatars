@@ -170,9 +170,8 @@ client.on("message", (channel, tags, message, self) => {
             );
           }
         } else {
-          // !do_stuff args
-          console.log(usersInThisSession);
-          console.log(`${username} : ${command} ${args}`);
+          // Pass all the unknown commands (starting with ! ) to the frontend
+          // in hopes that it knows what to do with them.
           if (usersInThisSession[username]) {
             if (!usersInThisSession[username].unhandledCommands) {
               usersInThisSession[username].unhandledCommands = [
@@ -191,14 +190,20 @@ client.on("message", (channel, tags, message, self) => {
         }
       }
     }
+    if (!tags.emotes && !detectedCommand) {
+      // NOT A COMMAND
+      if (newMessagesObject[username]) {
+        newMessagesObject[username].push(message);
+      } else {
+        newMessagesObject[username] = [message];
+      }
+    }
 
     // counts messages written by the user
     // part of the game?
     users[username].messageCount += 1;
     usersInThisSession[username].messageCount += 1;
 
-    // this user wrote a message!
-    newMessagesObject[username] = {};
     users[username].xp += 15;
 
     // save that as a json file then
@@ -240,6 +245,9 @@ app.get("/users", (req, res) => {
     emotes: newEmotesArray,
     messages: newMessagesObject,
   });
+  for (let user of Object.values(usersInThisSession)) {
+    user.unhandledCommands = [];
+  }
   newEmotesArray = [];
   newMessagesObject = {};
 });
