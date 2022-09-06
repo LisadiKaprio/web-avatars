@@ -82,10 +82,12 @@ class Sprite {
     }
   }
 
-  draw(ctx) {
+  draw(ctx, xOffset, yOffset) {
     // position control (add nudge if needed)
-    const x = this.gameObject.x;
-    const y = this.gameObject.y;
+    xOffset = xOffset ? xOffset : 0;
+    yOffset = yOffset ? yOffset : 0;
+    const x = this.gameObject.x + xOffset;
+    const y = this.gameObject.y + yOffset;
 
     const [frameX, frameY] = this.frame;
 

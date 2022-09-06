@@ -13,6 +13,7 @@ class Overworld {
 
     this.userAvatars = {};
     this.renderedEmotes = [];
+    this.renderedBubbles = [];
 
     this.isCutscenePlaying = false;
   }
@@ -41,7 +42,9 @@ class Overworld {
 
       // check if user wrote a message
       if (messagesObject[user]) {
-        this.userAvatars[user].changeBehaviour("talk");
+        let avatar = this.userAvatars[user];
+        avatar.changeBehaviour("talk");
+        this.createTextBubble(avatar, "+15 xp");
       }
     }
     for (let i = 0; i < emoteArray.length; i++) {
@@ -52,6 +55,19 @@ class Overworld {
       );
     }
   }
+
+  createTextBubble(origin, contents) {
+    const bubble = new Bubble({
+      type: "text",
+      attachedTo: origin,
+      x: origin.x,
+      y: origin.y - 100,
+      text: "+15 xp",
+    });
+
+    this.renderedBubbles.push(bubble);
+  }
+
   createNewEmote(emoteId, userAvatarx, userAvatary) {
     let emote = new Emote({
       x: userAvatarx + 75 / 2,
@@ -62,8 +78,6 @@ class Overworld {
       dragPhysicsY: -0.02,
     });
     this.renderedEmotes.push(emote);
-
-    console.log(this.userAvatars);
   }
 
   // get (normal twitchtv) emotes
@@ -96,20 +110,35 @@ class Overworld {
           userAvatar.y + userAvatar.sprite.displaySize + 3
         );
       }
-      // for(const emote of Object.values(this.renderedEmotes)){
-      //     emote.update();
-      //     emote.sprite.draw(this.ctx);
-      // }
-      for (
-        let i =
-          this.renderedEmotes.length > this.maxEmotes
-            ? this.renderedEmotes.length - this.maxEmotes
-            : 0;
-        i < this.renderedEmotes.length;
-        i++
-      ) {
-        this.renderedEmotes[i].update();
-        this.renderedEmotes[i].sprite.draw(this.ctx);
+
+      let dbg = this.renderedEmotes.length;
+      this.renderedEmotes = this.renderedEmotes.filter(
+        (emote) => !emote.toRemove
+      );
+      if (this.renderedEmotes.length < dbg) {
+        console.log("works");
+      }
+      for (const emote of Object.values(this.renderedEmotes)) {
+        emote.update();
+        emote.sprite.draw(this.ctx);
+      }
+      //   for (
+      //     let i =
+      //       this.renderedEmotes.length > this.maxEmotes
+      //         ? this.renderedEmotes.length - this.maxEmotes
+      //         : 0;
+      //     i < this.renderedEmotes.length;
+      //     i++
+      //   ) {
+      //     this.renderedEmotes[i].update();
+      //     this.renderedEmotes[i].sprite.draw(this.ctx);
+      //   }
+      this.renderedBubbles = this.renderedBubbles.filter(
+        (bubble) => !bubble.toRemove
+      );
+      for (let bubble of this.renderedBubbles) {
+        bubble.update();
+        bubble.draw(this.ctx);
       }
       requestAnimationFrame(() => {
         step();
