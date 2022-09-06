@@ -71,7 +71,7 @@ class Bubble {
     this.speed = config.speed || 2.0;
 
     this.behaviours = {
-      idle: [{ type: "ascend" }, { type: "oscilate" }, { type: "dissolve" }],
+      idle: [{ type: "oscilate" }, { type: "dissolve" }],
     };
 
     this.behaviourLoop = config.behaviourLoop || this.behaviours["idle"];
@@ -106,14 +106,17 @@ class Bubble {
     if (action.type == "ascend") {
       this.y -= this.speed;
     } else if (action.type == "oscilate") {
-      const numberOfCycles = 3;
+      const numberOfCycles = 2;
       const cycleTime = this.oscilateTime / numberOfCycles;
+      const cycleOffset = 0.5;
       const cycleProgress =
         (cycleTime - 1 - ((this.actionTime - 1) % cycleTime)) / cycleTime;
-      const oscillation = Math.cos((cycleProgress - 0.5) * Math.PI * 2);
+      const oscillation = Math.cos(
+        (cycleOffset + (cycleProgress - 0.5)) * Math.PI * 2
+      );
       this.y += oscillation * this.speed;
     } else if (action.type == "dissolve") {
-      this.y -= this.speed;
+      //this.y -= this.speed;
       // TODO: disappear
     }
   }

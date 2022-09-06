@@ -1,6 +1,6 @@
 "use strict";
 
-const MESSAGES_ALL_OVER_THE_PLACE = true;
+const MESSAGES_ALL_OVER_THE_PLACE = false;
 const CHAT = { x: 20, y: 20, font_size: 18, line_height: 24 };
 
 class Overworld {
@@ -187,7 +187,7 @@ function createTextBubble(origin, contents) {
     type: "text",
     //attachedTo: origin,
     x: origin.x + xOffset,
-    y: origin.y - 100,
+    y: origin.y - 0,
     text: contents,
   });
   return bubble;
@@ -199,7 +199,7 @@ function createAdvancedBubble(config) {
     type: config.type,
     //attachedTo: origin,
     x: config.x + xOffset,
-    y: config.y - 100,
+    y: config.y - 0,
     text: config.text,
     behaviourLoop: config.behaviourLoop || "idle",
   });
