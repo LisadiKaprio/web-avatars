@@ -2,6 +2,8 @@
 
 [] *important!* reduce size by 2
 
+[] log window: "Welcome back %username!" after the user has texted again after falling asleep
+
 # user-to-user interactions
 
 [] *important!* !hug %username
@@ -15,6 +17,8 @@
 [] *important!* !bonk %username
 
   -> very same as the previous one, just with a different set of animations
+
+  -> LISA TODO [] bonk user sprites
 
 
 # labors
@@ -80,7 +84,7 @@
 
   -> LISA TODO: z z z spritesheet
 
-  -> LISA TODO: z z z spritesheet
+  -> LISA TODO: sleeping user sprites
 
   -> *important!* LISA TODO: think of something better for that (they get smaller? lay on the ground? go to specific location?)
 
