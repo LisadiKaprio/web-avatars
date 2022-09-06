@@ -1,12 +1,6 @@
 ## misc
 
-[] *important!* when talking: +15 xp animation above the user's head 
-
-  -> LISA TODO: [] spritesheet
-
-  -> appearing above its head, with slow movement up, then stop and float up and down for ~3 secs, then movement up with dissolve to disappear
-
-  -> save this type of animation to be used later for gained items and other xp gains
+[] *important!* reduce size by 2
 
 # user-to-user interactions
 
@@ -66,26 +60,13 @@
   ->
 
 # log window
-* TLDR: same as bot's chat messages in para's farm game, but packed onto the game canvas in some corner, not written in actual twitch chat
 
-[] *important!* basic layout
-
-[] *important!* messages when something happens
-
-  -> "Hello %username, thanks for chatting!" on user's first chat/appearence"
-
-  -> "%username hasn't written much in chat for a while now... Seems like they fell asleep!"
-
-[] error messages when user tries to perform invalid action
-
-[] !stats for user to ask for infos/inventory
+[] 
 
 # stats
 * info that gets saved and can be looked up, or that allows silly stuff like "AnnoyingEdu is the number 1 hugger" or "kirinokirino is the most active player!"
 
 [] inventory!
-
-[] amount of xp!
 
 [] basically save amount of every interaction/labor that took place
 
@@ -99,6 +80,34 @@
 
   -> LISA TODO: z z z spritesheet
 
+  -> LISA TODO: z z z spritesheet
+
   -> *important!* LISA TODO: think of something better for that (they get smaller? lay on the ground? go to specific location?)
 
 
+# DONE
+
+[x] *important!* when talking: +15 xp animation above the user's head 
+
+  -> LISA TODO: [] spritesheet
+
+  -> [x] appearing above its head, with slow movement up, then stop and float up and down for ~3 secs, then movement up with dissolve to disappear
+
+  -> [x] save this type of animation to be used later for gained items and other xp gains
+
+  
+
+* log window: TLDR: same as bot's chat messages in para's farm game, but packed onto the game canvas in some corner, not written in actual twitch chat
+[x] *important!* basic layout
+
+[x] *important!* messages when something happens
+
+  -> "Hello %username, thanks for chatting!" on user's first chat/appearence"
+
+  -> "%username hasn't written much in chat for a while now... Seems like they fell asleep!"
+
+[x] error messages when user tries to perform invalid action
+
+[x] !stats for user to ask for infos/inventory
+
+[x] (stats) amount of xp!
