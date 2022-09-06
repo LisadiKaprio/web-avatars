@@ -237,7 +237,8 @@ class Avatar {
     } else {
       this.behaviourLoop = this.behaviours.idle;
     }
-    this.behaviourLoopIndex = 0;
+    this.behaviourLoopIndex = -1;
+    this.advanceBehaviour();
   }
 
   advanceBehaviour() {
