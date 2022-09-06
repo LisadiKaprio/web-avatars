@@ -9,8 +9,6 @@ class Overworld {
     // in this canvas, reference drawing methods?? stuff? idk
     this.ctx = this.canvas.getContext("2d");
 
-    this.maxEmotes = 25;
-
     this.userAvatars = {};
     this.renderedEmotes = [];
     this.renderedBubbles = [];
@@ -111,28 +109,13 @@ class Overworld {
         );
       }
 
-      let dbg = this.renderedEmotes.length;
       this.renderedEmotes = this.renderedEmotes.filter(
         (emote) => !emote.toRemove
       );
-      if (this.renderedEmotes.length < dbg) {
-        console.log("works");
-      }
       for (const emote of Object.values(this.renderedEmotes)) {
         emote.update();
         emote.sprite.draw(this.ctx);
       }
-      //   for (
-      //     let i =
-      //       this.renderedEmotes.length > this.maxEmotes
-      //         ? this.renderedEmotes.length - this.maxEmotes
-      //         : 0;
-      //     i < this.renderedEmotes.length;
-      //     i++
-      //   ) {
-      //     this.renderedEmotes[i].update();
-      //     this.renderedEmotes[i].sprite.draw(this.ctx);
-      //   }
       this.renderedBubbles = this.renderedBubbles.filter(
         (bubble) => !bubble.toRemove
       );
