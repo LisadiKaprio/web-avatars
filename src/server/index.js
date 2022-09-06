@@ -190,14 +190,20 @@ client.on("message", (channel, tags, message, self) => {
         }
       }
     }
+    if (!tags.emotes && !detectedCommand) {
+      // NOT A COMMAND
+      if (newMessagesObject[username]) {
+        newMessagesObject[username].push(message);
+      } else {
+        newMessagesObject[username] = [message];
+      }
+    }
 
     // counts messages written by the user
     // part of the game?
     users[username].messageCount += 1;
     usersInThisSession[username].messageCount += 1;
 
-    // this user wrote a message!
-    newMessagesObject[username] = {};
     users[username].xp += 15;
 
     // save that as a json file then

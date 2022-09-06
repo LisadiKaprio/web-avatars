@@ -1,5 +1,7 @@
 "use strict";
 
+const MESSAGES_ALL_OVER_THE_PLACE = true;
+
 class Overworld {
   constructor(config) {
     // passing in an element
@@ -34,15 +36,35 @@ class Overworld {
         let avatar = this.userAvatars[user];
         avatar.changeBehaviour("talk");
         this.renderedBubbles.push(createTextBubble(avatar, "+15 xp"));
+
+        // render the messages themselves on the random position of the entire screen.
+        if (MESSAGES_ALL_OVER_THE_PLACE) {
+          for (const message of messagesObject[user]) {
+            this.renderedBubbles.push(
+              createAdvancedBubble(
+                {
+                  type: "text",
+                  text: message,
+                  x: Math.random() * this.canvas.width,
+                  y: Math.random() * this.canvas.height,
+                  behaviourLoop: [
+                    { type: "ascend" },
+                    { type: "ascend" },
+                    { type: "ascend" },
+                    { type: "ascend" },
+                    { type: "dissolve" },
+                  ],
+                },
+                message
+              )
+            );
+          }
+        }
       }
     }
     for (let i = 0; i < emoteArray.length; i++) {
       this.renderedEmotes.push(
-        createNewEmote(
-          emoteArray[i].id,
-          this.userAvatars[emoteArray[i].name].x,
-          this.userAvatars[emoteArray[i].name].y
-        )
+        createNewEmote(emoteArray[i].id, this.userAvatars[emoteArray[i].name])
       );
     }
   }
@@ -109,20 +131,34 @@ function createNewUserAvatar(user, x) {
 }
 
 function createTextBubble(origin, contents) {
+  let xOffset = origin.sprite ? origin.sprite.displaySize / 2 : 0;
   const bubble = new Bubble({
     type: "text",
-    attachedTo: origin,
-    x: origin.x,
+    //attachedTo: origin,
+    x: origin.x + xOffset,
     y: origin.y - 100,
-    text: "+15 xp",
+    text: contents,
   });
   return bubble;
 }
 
-function createNewEmote(emoteId, userAvatarx, userAvatary) {
+function createAdvancedBubble(config) {
+  let xOffset = config.sprite ? config.sprite.displaySize / 2 : 0;
+  const bubble = new Bubble({
+    type: config.type,
+    //attachedTo: origin,
+    x: config.x + xOffset,
+    y: config.y - 100,
+    text: config.text,
+    behaviourLoop: config.behaviourLoop || "idle",
+  });
+  return bubble;
+}
+
+function createNewEmote(emoteId, userAvatar) {
   let emote = new Emote({
-    x: userAvatarx + 75 / 2,
-    y: userAvatary - 25,
+    x: userAvatar.x + userAvatar.sprite.displaySize / 2,
+    y: userAvatar.y - 25,
     src: getEmoteImg(emoteId),
     speedPhysicsX: Math.random() * 6 - 3,
     speedPhysicsY: -(Math.random() * 5),
