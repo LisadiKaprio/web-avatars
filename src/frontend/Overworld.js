@@ -1,6 +1,7 @@
 "use strict";
 
 const MESSAGES_ALL_OVER_THE_PLACE = true;
+const CHAT = { x: 20, y: 20, font_size: 18, line_height: 24 };
 
 class Overworld {
   constructor(config) {
@@ -14,6 +15,8 @@ class Overworld {
     this.userAvatars = {};
     this.renderedEmotes = [];
     this.renderedBubbles = [];
+
+    this.logs = [{ text: "Have a good day!", color: "red" }];
 
     this.isCutscenePlaying = false;
   }
@@ -40,6 +43,7 @@ class Overworld {
         // render the messages themselves on the random position of the entire screen.
         if (MESSAGES_ALL_OVER_THE_PLACE) {
           for (const message of messagesObject[user]) {
+            this.logs.push({ text: message, color: users[user].color });
             this.renderedBubbles.push(
               createAdvancedBubble(
                 {
@@ -105,6 +109,18 @@ class Overworld {
         bubble.update();
         bubble.draw(this.ctx);
       }
+
+      while (this.logs.length > 3) {
+        this.logs.shift();
+      }
+      for (let i = 0; i < this.logs.length; i++) {
+        const log_line = this.logs[i];
+        this.ctx.textAlign = "start";
+        this.ctx.fillStyle = log_line.color;
+        this.ctx.font = "bold " + CHAT.font_size + "px VictorMono-Medium";
+        this.ctx.fillText(log_line.text, CHAT.x, CHAT.y + i * CHAT.line_height);
+      }
+
       requestAnimationFrame(() => {
         step();
       });
