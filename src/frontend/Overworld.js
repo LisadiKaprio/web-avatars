@@ -48,11 +48,15 @@ class Overworld {
             text: `you are ${user}`,
             color: "blue",
           });
-        } else {
+        } else if (command == "stats") {
           this.logs.push({
-            text: `ERROR - ${user}: unknown command ${command}!`,
-            color: "red",
+            text: `${user} stats: ${users[user].xp} xp.`,
+            color: "blue",
           });
+        } else if (command == "dbg") {
+          console.log(users[user]);
+        } else {
+          // Ignore unhandled commands.
         }
       }
 
@@ -150,9 +154,17 @@ class Overworld {
       for (let i = 0; i < this.logs.length; i++) {
         const log_line = this.logs[i];
         this.ctx.textAlign = "start";
+        this.ctx.font = "bold " + CHAT.font_size + "px VictorMono-Medium";
         this.ctx.fillStyle = log_line.color;
         this.ctx.font = "bold " + CHAT.font_size + "px VictorMono-Medium";
         this.ctx.fillText(log_line.text, CHAT.x, CHAT.y + i * CHAT.line_height);
+        this.ctx.lineWidth = 0.5;
+        this.ctx.strokeStyle = "black";
+        this.ctx.strokeText(
+          log_line.text,
+          CHAT.x,
+          CHAT.y + i * CHAT.line_height
+        );
       }
 
       requestAnimationFrame(() => {

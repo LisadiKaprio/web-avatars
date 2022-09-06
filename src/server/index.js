@@ -197,14 +197,15 @@ client.on("message", (channel, tags, message, self) => {
       } else {
         newMessagesObject[username] = [message];
       }
+
+      // counts messages written by the user
+      // part of the game?
+      users[username].messageCount += 1;
+      usersInThisSession[username].messageCount += 1;
+
+      users[username].xp += 15;
+      usersInThisSession[username].xp += 15;
     }
-
-    // counts messages written by the user
-    // part of the game?
-    users[username].messageCount += 1;
-    usersInThisSession[username].messageCount += 1;
-
-    users[username].xp += 15;
 
     // save that as a json file then
     saveUser(username);
