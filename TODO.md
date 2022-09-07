@@ -78,13 +78,19 @@
 
 # misc
 
+[] !lurk
+
+  -> LISA TODO: sleeping/hiding user sprites
+
+  -> log window: "%username has something better to do. Have a nice lurk!"
+
 [] user appears by coming into the screen from the left or the right (no talking animation plays yet)
 
 [] if user hasn't written anything in chat for 20 minutes: play z z z animation above their head and make them stop the idle walking routine
 
   -> LISA TODO: z z z spritesheet
 
-  -> LISA TODO: sleeping user sprites
+  -> LISA TODO: sleeping/hiding user sprites
 
   -> *important!* LISA TODO: think of something better for that (they get smaller? lay on the ground? go to specific location?)
 
