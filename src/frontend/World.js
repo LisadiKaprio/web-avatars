@@ -40,7 +40,11 @@ class World {
     for (const [name, user] of Object.entries(users)) {
       // create a new user avatar.
       if (!this.userAvatars[name]) {
-        this.userAvatars[name] = createNewUserAvatar(user, this.time);
+        this.userAvatars[name] = createNewUserAvatar(
+          user,
+          Math.random() * this.canvas.width,
+          this.time
+        );
         this.chat.push({
           text: `Hello ${name}, thanks for chatting!`,
           color: user.color,
@@ -181,11 +185,11 @@ class World {
   }
 }
 
-function createNewUserAvatar(user, time) {
+function createNewUserAvatar(user, x, time) {
   let avatar = new Avatar({
     name: user.name,
     color: user.color,
-    x: Math.random() * this.canvas.width,
+    x: x,
     y: 850,
     src: "images/chars/bunny.png",
     mask: "images/chars/bunny-mask.png",
