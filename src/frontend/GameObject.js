@@ -233,6 +233,37 @@ class Avatar {
     this.lastChatTime = config.time;
   }
 
+  update() {
+    this.actionTime -= 1;
+    if (this.actionTime <= 0) {
+      this.advanceBehaviour();
+    }
+    let action = this.behaviourLoop[this.behaviourLoopIndex];
+    if (action.type == "walk") {
+      if (this.x >= 1920 - 150) {
+        this.direction = "left";
+      }
+      if (this.x <= 0) {
+        this.direction = "right";
+      }
+      if (this.direction == "left") {
+        this.x -= this.speed;
+      } else if (this.direction == "right") {
+        this.x += this.speed;
+      }
+    }
+  }
+
+  draw(ctx) {
+    this.sprite.draw(ctx);
+    ctx.fillStyle = this.color;
+    ctx.fillText(
+      this.name,
+      this.x + this.sprite.displaySize / 2,
+      this.y + this.sprite.displaySize + 3
+    );
+  }
+
   changeBehaviour(behaviour) {
     if (behaviour) {
       this.behaviourLoop = this.behaviours[behaviour];
@@ -259,27 +290,6 @@ class Avatar {
       // play out all the frames of animation, then switch to next behavior
       this.sprite.currentAnimation = "talking";
       this.actionTime = 1000;
-    }
-  }
-
-  update() {
-    this.actionTime -= 1;
-    if (this.actionTime <= 0) {
-      this.advanceBehaviour();
-    }
-    let action = this.behaviourLoop[this.behaviourLoopIndex];
-    if (action.type == "walk") {
-      if (this.x >= 1920 - 150) {
-        this.direction = "left";
-      }
-      if (this.x <= 0) {
-        this.direction = "right";
-      }
-      if (this.direction == "left") {
-        this.x -= this.speed;
-      } else if (this.direction == "right") {
-        this.x += this.speed;
-      }
     }
   }
 }

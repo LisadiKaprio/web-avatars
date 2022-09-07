@@ -8,8 +8,6 @@ async function main() {
     element: document.querySelector(".game-container"),
   });
 
-  world.init();
-
   async function fetchUsers() {
     // fetch the users, emotes and messages from the server.
     try {
@@ -17,7 +15,7 @@ async function main() {
       let { users, emotes, messages } = await resp.json();
 
       // update the world with the data from the server.
-      world.update(users, emotes, messages);
+      world.feedNewData(users, emotes, messages);
     } catch (error) {
       if (error.message.startsWith("NetworkError")) {
         // TODO: a disconnect icon or loading message.
@@ -31,7 +29,14 @@ async function main() {
     setTimeout(fetchUsers, UPDATE_PERIOD);
   }
 
+  function step(timestep) {
+    world.update(timestep);
+    requestAnimationFrame(step);
+  }
+
   await fetchUsers();
+
+  requestAnimationFrame(step);
 }
 
 main();

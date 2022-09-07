@@ -1,7 +1,16 @@
 "use strict";
 
 const MESSAGES_ALL_OVER_THE_PLACE = false;
-const CHAT = { x: 20, y: 20, font_size: 18, line_height: 24 };
+const CHAT = {
+  x: 20,
+  y: 20,
+  fontSize: 18,
+  lineHeight: 24,
+  maxLines: 3,
+  outlineWidth: 0.4,
+  outlineColor: "black",
+};
+const INACTIVE_TIME = 1000 * 60 * 20;
 
 class World {
   constructor(config) {
@@ -9,68 +18,53 @@ class World {
     this.element = config.element;
     // in this element, reference the canvas
     this.canvas = this.element.querySelector(".game-canvas");
-    // in this canvas, reference drawing methods?? stuff? idk
     this.ctx = this.canvas.getContext("2d");
 
     this.userAvatars = {};
     this.renderedEmotes = [];
     this.renderedBubbles = [];
 
-    this.logs = [{ text: "Have a good day!", color: "red" }];
+    this.chat = [{ text: "Have a good day!", color: "red" }];
 
     this.time = 0;
   }
 
-  update(users, emoteArray, messagesObject) {
+  feedNewData(users, emotes, messages) {
     this.time += UPDATE_PERIOD;
+
     // difference between value and keys:
-    // value = {name: 'kirinokirino', messageCount: 2}
+    // value = {name: 'kirinokirino', messageCount: 2, ... }
     // key = kirinokirino
     // key is like 1 in array[1]
-    for (const user of Object.keys(users)) {
-      if (!this.userAvatars[user]) {
-        this.userAvatars[user] = createNewUserAvatar(
-          users[user],
+
+    for (const [name, user] of Object.entries(users)) {
+      // create a new user avatar.
+      if (!this.userAvatars[name]) {
+        this.userAvatars[name] = createNewUserAvatar(
+          user,
           Math.random() * this.canvas.width,
           this.time
         );
-        this.logs.push({
-          text: `Hello ${user}, thanks for chatting!`,
-          color: users[user].color,
+        this.chat.push({
+          text: `Hello ${name}, thanks for chatting!`,
+          color: user.color,
         });
       }
 
-      // check if user tried to perform an action
-      const commands = users[user].unhandledCommands;
-      for (const { command, args } of commands) {
-        if (command == "whoami") {
-          this.logs.push({
-            text: `you are ${user}`,
-            color: "blue",
-          });
-        } else if (command == "stats") {
-          this.logs.push({
-            text: `${user} stats: ${users[user].xp} xp.`,
-            color: "blue",
-          });
-        } else if (command == "dbg") {
-          console.log(users[user]);
-        } else {
-          // Ignore unhandled commands.
-        }
-      }
+      // handle user commands
+      this.handleCommands(user);
 
-      // check if user wrote a message
-      if (messagesObject[user]) {
-        let avatar = this.userAvatars[user];
+      // handle user messages
+      if (messages[name]) {
+        let avatar = this.userAvatars[name];
         avatar.changeBehaviour("talk");
         avatar.lastChatTime = this.time;
         this.renderedBubbles.push(createTextBubble(avatar, "+15 xp"));
 
-        // render the messages themselves on the random position of the entire screen.
+        // log the message in chat and add a message bubble
         if (MESSAGES_ALL_OVER_THE_PLACE) {
-          for (const message of messagesObject[user]) {
-            this.logs.push({ text: message, color: users[user].color });
+          for (const message of messages[user]) {
+            this.chat.push({ text: message, color: users[user].color });
             this.renderedBubbles.push(
               createAdvancedBubble(
                 {
@@ -93,90 +87,102 @@ class World {
         }
       }
     }
-    for (let i = 0; i < emoteArray.length; i++) {
-      this.renderedEmotes.push(
-        createNewEmote(emoteArray[i].id, this.userAvatars[emoteArray[i].name])
-      );
+
+    // spawn new emotes since last data pull
+    this.renderedEmotes.push(...createNewEmotes(emotes, this.userAvatars));
+  }
+
+  handleCommands(user) {
+    const commands = user.unhandledCommands;
+    if (commands) {
+      for (const { command, args } of commands) {
+        if (command == "whoami") {
+          this.chat.push({
+            text: `you are ${user.name}`,
+            color: "blue",
+          });
+        } else if (command == "stats") {
+          this.chat.push({
+            text: `${user.name} stats: ${user.xp} xp.`,
+            color: "blue",
+          });
+        } else if (command == "dbg") {
+          console.log(user);
+        } else {
+          // Ignore unhandled commands.
+        }
+      }
     }
   }
 
-  // game loop
-  // - updating frames, moving pos of the chars
-  startGameLoop() {
-    const step = () => {
-      // clear canvas
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  update(timestep) {
+    // clear canvas
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      // aligns all
-      this.ctx.textAlign = "center";
-
-      for (const userAvatar of Object.values(this.userAvatars)) {
-        userAvatar.update();
-        userAvatar.sprite.draw(this.ctx);
-        this.ctx.fillStyle = userAvatar.color;
-        this.ctx.font = "bold 16px VictorMono-Medium";
-        this.ctx.fillText(
-          userAvatar.name,
-          userAvatar.x + userAvatar.sprite.displaySize / 2,
-          userAvatar.y + userAvatar.sprite.displaySize + 3
-        );
-        if (
-          userAvatar.isActive &&
-          this.time - userAvatar.lastChatTime >= 1000 * 60 * 20
-        ) {
-          userAvatar.changeBehaviour("sleep");
-          userAvatar.isActive = false;
-          this.logs.push({
-            text: `${userAvatar.name} hasn't written much in chat for a while now... Seems like they fell asleep!`,
-            color: "grey",
-          });
-        }
-      }
-
-      this.renderedEmotes = this.renderedEmotes.filter(
-        (emote) => !emote.toRemove
-      );
-      for (const emote of Object.values(this.renderedEmotes)) {
-        emote.update();
-        emote.sprite.draw(this.ctx);
-      }
-      this.renderedBubbles = this.renderedBubbles.filter(
-        (bubble) => !bubble.toRemove
-      );
-      for (let bubble of this.renderedBubbles) {
-        bubble.update();
-        bubble.draw(this.ctx);
-      }
-
-      while (this.logs.length > 3) {
-        this.logs.shift();
-      }
-      for (let i = 0; i < this.logs.length; i++) {
-        const log_line = this.logs[i];
-        this.ctx.textAlign = "start";
-        this.ctx.font = "bold " + CHAT.font_size + "px VictorMono-Medium";
-        this.ctx.fillStyle = log_line.color;
-        this.ctx.font = "bold " + CHAT.font_size + "px VictorMono-Medium";
-        this.ctx.fillText(log_line.text, CHAT.x, CHAT.y + i * CHAT.line_height);
-        this.ctx.lineWidth = 0.5;
-        this.ctx.strokeStyle = "black";
-        this.ctx.strokeText(
-          log_line.text,
-          CHAT.x,
-          CHAT.y + i * CHAT.line_height
-        );
-      }
-
-      requestAnimationFrame(() => {
-        step();
-      });
-    };
-    step();
+    this.updateAvatars();
+    this.updateEmotes();
+    this.updateBubbles();
+    this.updateChat();
   }
 
-  init() {
-    this.startGameLoop();
-    console.log("init");
+  updateAvatars() {
+    // aligns all nicknames
+    this.ctx.textAlign = "center";
+    this.ctx.font = "bold 16px VictorMono-Medium";
+    for (const userAvatar of Object.values(this.userAvatars)) {
+      if (
+        userAvatar.isActive &&
+        this.time - userAvatar.lastChatTime >= INACTIVE_TIME
+      ) {
+        userAvatar.changeBehaviour("sleep");
+        userAvatar.isActive = false;
+        this.chat.push({
+          text: `${userAvatar.name} hasn't written much in chat for a while now... Seems like they fell asleep!`,
+          color: "grey",
+        });
+      }
+      userAvatar.update();
+      userAvatar.draw(this.ctx);
+    }
+  }
+
+  updateEmotes() {
+    this.renderedEmotes = this.renderedEmotes.filter(
+      (emote) => !emote.toRemove
+    );
+    for (const emote of Object.values(this.renderedEmotes)) {
+      emote.update();
+      emote.sprite.draw(this.ctx);
+    }
+  }
+
+  updateBubbles() {
+    this.renderedBubbles = this.renderedBubbles.filter(
+      (bubble) => !bubble.toRemove
+    );
+    for (let bubble of this.renderedBubbles) {
+      bubble.update();
+      bubble.draw(this.ctx);
+    }
+  }
+
+  updateChat() {
+    // remove the lines that wouldn't fit in the chat
+    while (this.chat.length > CHAT.maxLines) {
+      this.chat.shift();
+    }
+    // styles applicable to all lines
+    this.ctx.textAlign = "start";
+    this.ctx.font = "bold " + CHAT.fontSize + "px VictorMono-Medium";
+    this.ctx.lineWidth = CHAT.outlineWidth;
+    this.ctx.strokeStyle = CHAT.outlineColor;
+
+    for (let i = 0; i < this.chat.length; i++) {
+      const log_line = this.chat[i];
+      this.ctx.fillStyle = log_line.color;
+      this.ctx.fillText(log_line.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
+      this.ctx.strokeText(log_line.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
+    }
   }
 }
 
@@ -218,16 +224,27 @@ function createAdvancedBubble(config) {
   return bubble;
 }
 
-function createNewEmote(emoteId, userAvatar) {
+function createNewEmote(emoteId, x, y) {
   let emote = new Emote({
-    x: userAvatar.x + userAvatar.sprite.displaySize / 2,
-    y: userAvatar.y - 25,
+    x: x,
+    y: y,
     src: getEmoteImg(emoteId),
     speedPhysicsX: Math.random() * 6 - 3,
     speedPhysicsY: -(Math.random() * 5),
     dragPhysicsY: -0.02,
   });
   return emote;
+}
+
+function createNewEmotes(emotes, avatars) {
+  let newEmotes = [];
+  for (let i = 0; i < emotes.length; i++) {
+    let avatar = avatars[emotes[i].name];
+    const x = avatar.x + avatar.sprite.displaySize / 2;
+    const y = avatar.y - 25;
+    newEmotes.push(createNewEmote(emotes[i].id, x, y));
+  }
+  return newEmotes;
 }
 
 // get (normal twitchtv) emotes
