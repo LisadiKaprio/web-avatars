@@ -3,7 +3,7 @@
 const MESSAGES_ALL_OVER_THE_PLACE = false;
 const CHAT = { x: 20, y: 20, font_size: 18, line_height: 24 };
 
-class Overworld {
+class World {
   constructor(config) {
     // passing in an element
     this.element = config.element;

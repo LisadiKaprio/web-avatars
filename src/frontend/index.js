@@ -3,39 +3,35 @@
 const UPDATE_PERIOD = 1000;
 
 async function main() {
-  console.log("Frontend index.js loaded.");
-
-  // create a new Overworld instance
-  let overworld = new Overworld({
+  // create a new World instance
+  let world = new World({
     element: document.querySelector(".game-container"),
   });
-  // let overworld go
-  overworld.init();
 
-  let usersInFrontend = {};
+  world.init();
 
-  let newEmotesArray = [];
-  let newMessagesObject = {};
-
-  async function pollForDataAsync() {
-    // send a request to the server and store data in some variable
+  async function fetchUsers() {
+    // fetch the users, emotes and messages from the server.
     try {
       const resp = await fetch("/users");
       let { users, emotes, messages } = await resp.json();
 
-      usersInFrontend = users;
-      newEmotesArray = emotes;
-      newMessagesObject = messages;
-
-      // redraw
-      overworld.update(usersInFrontend, newEmotesArray, newMessagesObject);
+      // update the world with the data from the server.
+      world.update(users, emotes, messages);
     } catch (error) {
-      console.error(error);
+      if (error.message.startsWith("NetworkError")) {
+        // TODO: a disconnect icon or loading message.
+        console.error("Server didn't respond!");
+      } else {
+        throw error;
+      }
     }
-    setTimeout(pollForDataAsync, UPDATE_PERIOD);
+
+    // queue the next server request
+    setTimeout(fetchUsers, UPDATE_PERIOD);
   }
 
-  await pollForDataAsync();
+  await fetchUsers();
 }
 
 main();
