@@ -25,10 +25,9 @@ const DATA_DIR = "./data";
 const USER_DATA_DIR = DATA_DIR + "/users";
 
 const users = loadUsers();
-let usersInThisSession = {};
-
-let newEmotesArray = [];
-let newMessagesObject = {};
+let activeUsers = [];
+let newEmotes = [];
+let newMessages = {};
 
 function loadUsers() {
   const users = {};
@@ -118,14 +117,14 @@ client.on("message", (channel, tags, message, self) => {
     }
 
     // same, but for new users in current session aka current stream
-    if (!(username in usersInThisSession)) {
-      putUserIntoObject(usersInThisSession, tags);
+    if (!(username in activeUsers)) {
+      activeUsers.push(username);
     }
 
     if (tags.emotes) {
       for (const [emote, charPositions] of Object.entries(tags.emotes)) {
         for (let i = 0; i < charPositions.length; i++) {
-          newEmotesArray.push({
+          newEmotes.push({
             name: username,
             id: emote,
           });
@@ -147,7 +146,7 @@ client.on("message", (channel, tags, message, self) => {
         // MOD/BROADCASTER COMMANDS
         // !startWeb
         if (message === clearUsers) {
-          usersInThisSession = {};
+          activeUsers = [];
           //needs something in frontend that reacts to that too and deletes gameobjects
         } else if (message === startMessage) {
           botActive = true;
@@ -172,39 +171,34 @@ client.on("message", (channel, tags, message, self) => {
         } else {
           // Pass all the unknown commands (starting with ! ) to the frontend
           // in hopes that it knows what to do with them.
-          if (usersInThisSession[username]) {
-            if (!usersInThisSession[username].unhandledCommands) {
-              usersInThisSession[username].unhandledCommands = [
-                {
-                  command: command,
-                  args: args,
-                },
-              ];
-            } else {
-              usersInThisSession[username].unhandledCommands.push({
+          if (!users[username].unhandledCommands) {
+            users[username].unhandledCommands = [
+              {
                 command: command,
                 args: args,
-              });
-            }
+              },
+            ];
+          } else {
+            users[username].unhandledCommands.push({
+              command: command,
+              args: args,
+            });
           }
         }
       }
     }
     if (!tags.emotes && !detectedCommand) {
       // NOT A COMMAND
-      if (newMessagesObject[username]) {
-        newMessagesObject[username].push(message);
+      if (newMessages[username]) {
+        newMessages[username].push(message);
       } else {
-        newMessagesObject[username] = [message];
+        newMessages[username] = [message];
       }
 
       // counts messages written by the user
       // part of the game?
       users[username].messageCount += 1;
-      usersInThisSession[username].messageCount += 1;
-
       users[username].xp += 15;
-      usersInThisSession[username].xp += 15;
     }
 
     // save that as a json file then
@@ -225,6 +219,7 @@ function putUserIntoObject(object, tags) {
 // COMMUNICATION WITH THE FRONTEND
 
 const express = require("express");
+const { URLSearchParams } = require("url");
 const app = express();
 
 // what port do we run on?
@@ -235,22 +230,36 @@ const port = 2501;
 app.use(express.static("src/frontend"));
 
 // what's displayed in localhost:2501
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+app.get("/dbg", (req, res) => {
+  let filteredUsers = {};
+  for (const name of activeUsers) {
+    filteredUsers[name] = users[name];
+  }
+  res.send(
+    JSON.stringify({
+      users: users,
+      active: activeUsers,
+      filtered: filteredUsers,
+    })
+  );
 });
 
 // send over the info inside the users variable
 app.get("/users", (req, res) => {
-  res.send({
-    users: usersInThisSession,
-    emotes: newEmotesArray,
-    messages: newMessagesObject,
-  });
-  for (let user of Object.values(usersInThisSession)) {
-    user.unhandledCommands = [];
+  let filteredUsers = {};
+  for (const name of activeUsers) {
+    filteredUsers[name] = users[name];
   }
-  newEmotesArray = [];
-  newMessagesObject = {};
+  res.send({
+    users: filteredUsers,
+    emotes: newEmotes,
+    messages: newMessages,
+  });
+  for (const user of activeUsers) {
+    users[user].unhandledCommands = [];
+  }
+  newEmotes = [];
+  newMessages = {};
 });
 
 // (:
