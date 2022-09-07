@@ -95,7 +95,6 @@ class Bubble {
     }
     if (this.type == "text") {
       ctx.fillStyle = this.color;
-      ctx.font = "bold 16px VictorMono-Medium";
       ctx.fillText(this.text, this.x + xOffset, this.y);
     } else if (this.type == "icon") {
       this.sprite.draw(ctx, xOffset);

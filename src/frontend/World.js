@@ -40,11 +40,7 @@ class World {
     for (const [name, user] of Object.entries(users)) {
       // create a new user avatar.
       if (!this.userAvatars[name]) {
-        this.userAvatars[name] = createNewUserAvatar(
-          user,
-          Math.random() * this.canvas.width,
-          this.time
-        );
+        this.userAvatars[name] = createNewUserAvatar(user, this.time);
         this.chat.push({
           text: `Hello ${name}, thanks for chatting!`,
           color: user.color,
@@ -157,6 +153,8 @@ class World {
     this.renderedBubbles = this.renderedBubbles.filter(
       (bubble) => !bubble.toRemove
     );
+
+    this.ctx.font = "bold 16px VictorMono-Medium";
     for (let bubble of this.renderedBubbles) {
       bubble.update();
       bubble.draw(this.ctx);
@@ -183,15 +181,16 @@ class World {
   }
 }
 
-function createNewUserAvatar(user, x, time) {
+function createNewUserAvatar(user, time) {
   let avatar = new Avatar({
     name: user.name,
     color: user.color,
-    x: x || 500,
+    x: Math.random() * this.canvas.width,
     y: 850,
     src: "images/chars/bunny.png",
     mask: "images/chars/bunny-mask.png",
     time: time,
+    displaySize: 100,
   });
   return avatar;
 }

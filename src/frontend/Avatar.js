@@ -15,6 +15,7 @@ class Avatar {
       src: config.src,
       mask: config.mask,
       color: this.color,
+      displaySize: config.displaySize || 150,
       animations: config.animations || {
         idle: new Animation({
           frames: [
