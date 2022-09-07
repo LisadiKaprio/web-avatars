@@ -55,11 +55,30 @@ class World {
       this.handleCommands(user);
 
       // handle user messages
-      if (messages[name]) {
+      if (messages[name] || emotes.some((emote) => emote.name == name)) {
         let avatar = this.userAvatars[name];
         avatar.changeBehaviour("talk");
+        if (!avatar.isActive) {
+          this.chat.push({
+            text: `Welcome back ${name}!`,
+            color: users[user].color,
+          });
+        }
+        avatar.isActive = true;
         avatar.lastChatTime = this.time;
-        this.renderedBubbles.push(createTextBubble(avatar, "+15 xp"));
+        let xpSprite = {
+          src: "images/bubble/xp.png",
+          cutSize: 150,
+          displaySize: 100,
+        };
+        this.renderedBubbles.push(
+          createAdvancedBubble({
+            type: "icon",
+            x: avatar.x,
+            y: avatar.y,
+            spriteInfo: xpSprite,
+          })
+        );
 
         // log the message in chat and add a message bubble
         if (MESSAGES_ALL_OVER_THE_PLACE) {
@@ -212,14 +231,17 @@ function createTextBubble(origin, contents) {
 }
 
 function createAdvancedBubble(config) {
-  let xOffset = config.sprite ? config.sprite.displaySize / 2 : 0;
+  let offset = config.spriteInfo ? config.spriteInfo.displaySize / 2 : 0;
   const bubble = new Bubble({
     type: config.type,
     //attachedTo: origin,
-    x: config.x + xOffset,
-    y: config.y - 0,
+    x: config.x,
+    y: config.y - offset,
     text: config.text,
-    behaviourLoop: config.behaviourLoop || "idle",
+    displaySize: config.spriteInfo.displaySize,
+    cutSize: config.spriteInfo.cutSize,
+    src: config.spriteInfo.src,
+    behaviourLoop: config.behaviourLoop,
   });
   return bubble;
 }

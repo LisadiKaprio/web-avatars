@@ -17,6 +17,8 @@ class Bubble {
         gameObject: this,
         src: config.src,
         mask: config.mask,
+        cutSize: config.cutSize,
+        displaySize: config.displaySize,
         color: this.color,
         animations: config.animations || {
           idle: new Animation({

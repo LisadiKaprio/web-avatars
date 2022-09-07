@@ -25,7 +25,6 @@ class Sprite {
       util.asDrawable(config.src).then(loaded);
     }
 
-    this.isEmote = config.isEmote || false;
     this.cutSize = config.cutSize || 300;
     this.displaySize = config.displaySize || 150;
 
@@ -74,8 +73,6 @@ class Sprite {
         this.currentAnimation = "idle";
         this.currentAnimationFrame = 0;
       } else {
-        this.gameObject.emitEvent("AvatarTalkingComplete");
-        this.gameObject.changeBehaviour(BEHAVIOUR.IDLE);
         this.currentAnimation = "idle";
         this.currentAnimationFrame = 0;
       }
