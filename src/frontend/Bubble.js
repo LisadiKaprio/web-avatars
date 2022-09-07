@@ -2,49 +2,49 @@
 
 class Bubble {
   constructor(config) {
-    this.type = config.type;
-    // username the bubble (can be) attached to
+    // username the bubble (can be) attached to, setting it will make the bubble move along
     this.attachedTo = config.attachedTo;
-    // define and pass in position, or else default to 0
     this.toRemove = false;
     this.x = config.x || 0;
     this.y = config.y || 950;
     this.color = config.color || "black";
-    // define sprite
-    this.sprite =
-      config.type == "icon"
-        ? new Sprite({
-            gameObject: this,
-            src: config.src,
-            mask: config.mask,
-            color: this.color,
-            animations: config.animations || {
-              idle: new Animation({
-                frames: [
-                  [0, 0],
-                  [1, 0],
-                ],
-                doesLoop: true,
-              }),
-            },
-          })
-        : undefined;
 
-    this.text = config.type == "text" ? config.text : undefined;
+    // type is either "text" or "icon",
+    // config would provide either text or sprite depending on the type
+    this.type = config.type;
+    if (config.type == "icon") {
+      this.sprite = new Sprite({
+        gameObject: this,
+        src: config.src,
+        mask: config.mask,
+        color: this.color,
+        animations: config.animations || {
+          idle: new Animation({
+            frames: [
+              [0, 0],
+              [1, 0],
+            ],
+            doesLoop: true,
+          }),
+        },
+      });
+    } else if (config.type == "text") {
+      this.text = config.text;
+    }
 
-    this.ascendTime = 30;
-    this.oscilateTime = 100;
-    this.dissolveTime = 30;
-    this.actionTime =
-      config.actionTime === undefined ? this.ascendTime : config.actionTime;
-    this.speed = config.speed || 2.0;
-
+    // Behaviours
     this.behaviours = {
-      idle: [{ type: "oscilate" }, { type: "dissolve" }],
+      idle: [
+        { type: "oscilate", time: 50 },
+        { type: "dissolve", time: 30 },
+      ],
     };
-
     this.behaviourLoop = config.behaviourLoop || this.behaviours["idle"];
     this.behaviourLoopIndex = 0;
+    this.actionTime = this.behaviourLoop[this.behaviourLoopIndex].time;
+
+    // Customization
+    this.speed = config.speed || 2.0;
   }
 
   advanceBehaviour() {
@@ -57,13 +57,7 @@ class Bubble {
     }
 
     let action = this.behaviourLoop[this.behaviourLoopIndex];
-    if (action.type == "ascend") {
-      this.actionTime = this.ascendTime;
-    } else if (action.type == "oscilate") {
-      this.actionTime = this.oscilateTime;
-    } else if (action.type === "dissolve") {
-      this.actionTime = this.dissolveTime;
-    }
+    this.actionTime = action.time;
   }
 
   update() {
@@ -75,15 +69,17 @@ class Bubble {
     if (action.type == "ascend") {
       this.y -= this.speed;
     } else if (action.type == "oscilate") {
-      const numberOfCycles = 2;
-      const cycleTime = this.oscilateTime / numberOfCycles;
-      const cycleOffset = 0.5;
+      const numberOfCycles = 1.0;
+      // if numberOfCycles = 0.5, then
+      // will always play the second half, so we need to offset the progress back half a cycle
+      const cycleOffset = 0;
+      const fullCycleSteps = action.time / numberOfCycles;
+      const thisCycleStep = ((this.actionTime - 1) % fullCycleSteps) + 1;
+      // precent completion
       const cycleProgress =
-        (cycleTime - 1 - ((this.actionTime - 1) % cycleTime)) / cycleTime;
-      const oscillation = Math.cos(
-        (cycleOffset + (cycleProgress - 0.5)) * Math.PI * 2
-      );
-      this.y += oscillation * this.speed;
+        (fullCycleSteps - thisCycleStep) / fullCycleSteps - cycleOffset;
+      const oscillation = Math.sin(cycleProgress * Math.PI * 2);
+      this.y -= oscillation * this.speed;
     } else if (action.type == "dissolve") {
       //this.y -= this.speed;
       // TODO: disappear

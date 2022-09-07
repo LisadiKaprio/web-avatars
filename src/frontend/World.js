@@ -73,11 +73,8 @@ class World {
                   x: Math.random() * this.canvas.width,
                   y: Math.random() * this.canvas.height,
                   behaviourLoop: [
-                    { type: "ascend" },
-                    { type: "ascend" },
-                    { type: "ascend" },
-                    { type: "ascend" },
-                    { type: "dissolve" },
+                    { type: "ascend", time: 100 },
+                    { type: "dissolve", time: 30 },
                   ],
                 },
                 message
