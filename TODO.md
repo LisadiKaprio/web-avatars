@@ -1,7 +1,5 @@
 ## misc
 
-[] *important!* reduce size by 2
-
 [] log window: "Welcome back %username!" after the user has texted again after falling asleep
 
 # user-to-user interactions
@@ -99,7 +97,7 @@
 
 [x] *important!* when talking: +15 xp animation above the user's head 
 
-  -> LISA TODO: [] spritesheet
+  -> LISA TODO: [x] spritesheet
 
   -> [x] appearing above its head, with slow movement up, then stop and float up and down for ~3 secs, then movement up with dissolve to disappear
 
@@ -121,3 +119,5 @@
 [x] !stats for user to ask for infos/inventory
 
 [x] (stats) amount of xp!
+
+[x] *important!* reduce size by 2
