@@ -23,6 +23,8 @@ class Avatar {
         consume: ANIMATIONS.consume,
         hug: ANIMATIONS.hug,
       },
+      // "bonk give left": [ [2,0], [0,5], [1,5], [0,5], [2,0] ],
+      // "bonk receive left": [ [0,1], [1,1], [2,5], [3,5], [0,6], [1,6], [2,6], [1,6], [2,6], [1,6], [2,6]],
     });
 
     this.actionTime = config.actionTime === undefined ? 24 : config.actionTime;
