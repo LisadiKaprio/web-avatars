@@ -68,15 +68,13 @@ class Avatar {
     } else if (action.type == "go") {
       // TODO: only done for x.
       const deltaX = action.x - this.x;
-      if (Math.abs(deltaX) < this.speed) {
-        this.x = action.x;
-        this.currentBehaviour.shift();
-        this.behaviourLoopIndex -= 1;
-        this.advanceBehaviour();
-      } else if (deltaX > this.speed) {
+      if (deltaX > this.speed + 0.1) {
         this.x += this.speed;
-      } else if (deltaX < this.speed) {
+      } else if (deltaX < -(this.speed + 0.1)) {
         this.x -= this.speed;
+      } else {
+        this.x = action.x;
+        this.actionTime = 1;
       }
     }
   }
@@ -101,15 +99,18 @@ class Avatar {
     // check for the ordering
     // instant actions
     if (!behaviour.actions) debugger;
-    // swap current behaviour to talk or hug immediately, but only if not hugging already.
+
+    // most urgent behaviours don't get swapped out
     if (
-      (!(
-        this.currentBehaviour.name == "hug" ||
-        this.currentBehaviour.name == "hugged"
-      ) &&
-        behaviour.name == "talk") ||
-      behaviour.name == "hug"
+      this.currentBehaviour.name == "hug" ||
+      this.currentBehaviour.name == "hugged"
     ) {
+      this.motivation.push(behaviour);
+      return;
+    }
+
+    // swap current behaviour to talk or hug immediately
+    if (behaviour.name == "talk" || behaviour.name == "hug") {
       // didn't finish action, do it later
       this.motivation.push(this.currentBehaviour);
       this.changeBehaviour(behaviour);
@@ -119,8 +120,9 @@ class Avatar {
       this.motivation.push(this.currentBehaviour);
       this.changeBehaviour(behaviour);
       return;
-    }
+    } // other cases where we need to decide to swap or not...
 
+    // don't swap by default
     this.motivation.push(behaviour);
   }
 
@@ -163,27 +165,30 @@ class Avatar {
       const distance = whoToHug.x - this.x;
       // half of this sprite and half of the other sprite
       const padding =
-        (this.sprite.displaySize + whoToHug.sprite.displaySize) / 2;
+        (this.sprite.displaySize + whoToHug.sprite.displaySize) / 3;
       if (Math.abs(distance) > padding) {
         // need to go closer to who we want to hug.
-        this.actionTime = 9999;
         // TODO: if too close maybe need to step away a little bit.
-        this.currentBehaviour.unshift({
+        this.actionTime = 100;
+        this.currentBehaviour.insert(this.behaviourLoopIndex, {
           type: "go",
           x: whoToHug.x - padding * Math.sign(distance),
           y: whoToHug.y,
         });
       } else {
-        // close enough for a hug, change animation of this and the other
-        this.sprite.setAnimation("hug");
-        this.actionTime = 100;
         if (whoToHug.currentBehaviour.name != "hug") {
+          // close enough for a hug, change animation of this and the other
+          this.sprite.setAnimation("hug");
+          this.actionTime = 100;
           const oppositeDirection = this.direction == "left" ? "right" : "left";
           whoToHug.changeBehaviour(
-            new Behaviour("hugged", [
-              { type: "hugged", direction: oppositeDirection },
-            ])
+            new Behaviour("hugged", [{ type: "hugged" }])
           );
+        } else {
+          this.actionTime = 50;
+          this.currentBehaviour.insert(this.behaviourLoopIndex, {
+            type: "stand",
+          });
         }
         // TODO: wait if who we want to hug is doing something
       }
@@ -191,8 +196,7 @@ class Avatar {
       this.sprite.setAnimation("hug");
       this.actionTime = 100;
     } else if (action.type == "go") {
-      // update will advance behaviour
-      this.actionTime = 9999;
+      this.actionTime = 100;
     }
   }
 }
@@ -219,6 +223,10 @@ class Behaviour {
 
   unshift(action) {
     this.actions.unshift(action);
+  }
+
+  insert(place, action) {
+    this.actions.splice(place, 0, action);
   }
 
   get length() {

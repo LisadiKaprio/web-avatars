@@ -112,9 +112,10 @@ class World {
     const commands = user.unhandledCommands;
     if (commands) {
       for (const { command, args } of commands) {
+        let parsed_args = args.match(/\w+/g);
         if (command == "hug") {
-          const toHug = args
-            ? args
+          const toHug = parsed_args
+            ? parsed_args
             : [
                 Object.keys(this.userAvatars)
                   .filter((name) => name != user.name)
@@ -153,7 +154,7 @@ class World {
           const userAvatar = this.userAvatars[user.name];
           this.chat.push({
             text: `${userAvatar.currentBehaviour.dbg()} | ${JSON.stringify(
-              userAvatar.motivation
+              userAvatar.motivation.map((motivation) => motivation.name)
             )}`,
           });
         } else {
