@@ -42,6 +42,7 @@ class Sprite {
     this.animationFrameLimit = config.animationFrameLimit || 25;
     this.animationFrameProgress = this.animationFrameLimit;
 
+    this.mirrored = false;
     // reference the game object
     this.gameObject = config.gameObject;
   }
@@ -98,26 +99,31 @@ class Sprite {
     const image = this.drawable ? this.drawable.image() : null;
     // if there is something avaiable to be drawn
     if (image) {
+      let oldTransform = ctx.getTransform();
+      if (this.mirrored) {
+        ctx.translate(x + this.displaySize, y);
+        ctx.scale(-1, 1);
+      } else {
+        ctx.translate(x, y);
+      }
+
       ctx.drawImage(
         image,
         // left cut, right cut,
-        // had a bug where frameX and frameY were switched around unexpectedly
-        // might need to go back and fix again if bug reoccurs
-        // (no)
         frameX * this.cutSize,
         frameY * this.cutSize,
         // size of the cut on x and y
         this.cutSize,
         this.cutSize,
         // position comes in here
-        x,
-        y,
+        0,
+        0,
         // display size
         this.displaySize,
         this.displaySize
       );
+      ctx.setTransform(oldTransform);
     }
-
     this.updateAnimationProgress();
   }
 }

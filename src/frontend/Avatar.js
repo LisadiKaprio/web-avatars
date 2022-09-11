@@ -164,7 +164,7 @@ class Avatar {
       // half of this sprite and half of the other sprite
       const padding =
         (this.sprite.displaySize + whoToHug.sprite.displaySize) / 3;
-      if (Math.abs(distance) > padding) {
+      if (Math.abs(distance) > padding + 10) {
         // need to go closer to who we want to hug.
         // TODO: if too close maybe need to step away a little bit.
         this.actionTime = 100;
@@ -178,9 +178,12 @@ class Avatar {
           // close enough for a hug, change animation of this and the other
           this.sprite.setAnimation("hug");
           this.actionTime = 100;
-          const oppositeDirection = this.direction == "left" ? "right" : "left";
+          this.sprite.mirrored = this.x < whoToHug.x;
+          // sets sprite mirrored here, doesn't reset it
           whoToHug.changeBehaviour(
-            new Behaviour("hugged", [{ type: "hugged" }])
+            new Behaviour("hugged", [
+              { type: "hugged", mirrored: !this.sprite.mirrored },
+            ])
           );
         } else {
           this.actionTime = 50;
@@ -191,6 +194,7 @@ class Avatar {
         // TODO: wait if who we want to hug is doing something
       }
     } else if (action.type == "hugged") {
+      this.sprite.mirrored = action.mirrored;
       this.sprite.setAnimation("hug");
       this.actionTime = 100;
     } else if (action.type == "go") {
