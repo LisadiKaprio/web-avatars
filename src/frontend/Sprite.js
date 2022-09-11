@@ -68,12 +68,8 @@ class Sprite {
     if (this.frame == undefined) {
       if (this.animations[this.currentAnimation].doesLoop) {
         this.currentAnimationFrame = 0;
-      } else if (this.gameObject.actionTime) {
-        this.gameObject.changeBehaviour();
-        this.currentAnimation = "idle";
-        this.currentAnimationFrame = 0;
       } else {
-        this.currentAnimation = "idle";
+        this.gameObject.endAnimation();
         this.currentAnimationFrame = 0;
       }
     }
@@ -86,6 +82,7 @@ class Sprite {
     const x = this.gameObject.x + xOffset;
     const y = this.gameObject.y + yOffset;
 
+    if (!this.frame) debugger;
     const [frameX, frameY] = this.frame;
 
     // if(this.drawable){
@@ -119,3 +116,71 @@ class Sprite {
     this.updateAnimationProgress();
   }
 }
+
+const ANIMATIONS = {
+  idle: new Animation({
+    frames: [
+      [0, 0],
+      [1, 0],
+    ],
+    doesLoop: true,
+  }),
+  talk: new Animation({
+    frames: [
+      [1, 1],
+      [2, 1],
+      [0, 2],
+      [1, 2],
+      [0, 2],
+      [1, 2],
+      [0, 2],
+      [1, 2],
+      [0, 2],
+      [1, 2],
+      [0, 2],
+      [1, 2],
+      [0, 2],
+      [1, 2],
+      [0, 2],
+      [1, 2],
+      [2, 1],
+      [1, 1],
+      [0, 1],
+    ],
+    doesLoop: false,
+  }),
+  gain: new Animation({
+    frames: [
+      [0, 1],
+      [1, 1],
+      [3, 1],
+      [2, 2],
+      [3, 2],
+      [3, 1],
+      [1, 1],
+      [0, 1],
+    ],
+    doesLoop: false,
+  }),
+  consume: new Animation({
+    frames: [
+      [2, 0],
+      [0, 3],
+      [1, 3],
+      [2, 3],
+      [3, 3],
+      [2, 3],
+      [1, 3],
+      [0, 3],
+      [2, 0],
+    ],
+    doesLoop: false,
+  }),
+  hug: new Animation({
+    frames: [
+      [0, 4],
+      [1, 4],
+    ],
+    doesLoop: true,
+  }),
+};

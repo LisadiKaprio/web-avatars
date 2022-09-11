@@ -57,7 +57,7 @@ class World {
       // handle user messages
       if (messages[name] || emotes.some((emote) => emote.name == name)) {
         let avatar = this.userAvatars[name];
-        avatar.changeBehaviour("talk");
+        avatar.pushMotivation(BEHAVIOURS.talk);
         if (!avatar.isActive) {
           this.chat.push({
             text: `Welcome back ${name}!`,
@@ -112,6 +112,32 @@ class World {
     const commands = user.unhandledCommands;
     if (commands) {
       for (const { command, args } of commands) {
+        if (command == "hug") {
+          const toHug = args
+            ? args
+            : [
+                Object.keys(this.userAvatars)
+                  .filter((name) => name != user.name)
+                  .random(),
+              ];
+
+          this.chat.push({ text: `${command} ${toHug}` });
+          const userAvatar = this.userAvatars[user.name];
+          let behaviours = [];
+          for (const name of toHug) {
+            const whoToHug = this.userAvatars[name];
+            if (whoToHug) {
+              behaviours.push(
+                new Behaviour("hug", [{ type: ACTIONS.hug, who: whoToHug }])
+              );
+            }
+          }
+          if (behaviours.length > 0) {
+            for (const behaviour of behaviours) {
+              userAvatar.pushMotivation(behaviour);
+            }
+          }
+        }
         if (command == "whoami") {
           this.chat.push({
             text: `you are ${user.name}`,
@@ -124,6 +150,12 @@ class World {
           });
         } else if (command == "dbg") {
           console.log(user);
+          const userAvatar = this.userAvatars[user.name];
+          this.chat.push({
+            text: `${userAvatar.currentBehaviour.dbg()} | ${JSON.stringify(
+              userAvatar.motivation
+            )}`,
+          });
         } else {
           // Ignore unhandled commands.
         }
@@ -150,7 +182,7 @@ class World {
         userAvatar.isActive &&
         this.time - userAvatar.lastChatTime >= INACTIVE_TIME
       ) {
-        userAvatar.changeBehaviour("sleep");
+        userAvatar.changeBehaviour(BEHAVIOURS.sleep);
         userAvatar.isActive = false;
         this.chat.push({
           text: `${userAvatar.name} hasn't written much in chat for a while now... Seems like they fell asleep!`,
@@ -196,10 +228,10 @@ class World {
     this.ctx.strokeStyle = CHAT.outlineColor;
 
     for (let i = 0; i < this.chat.length; i++) {
-      const log_line = this.chat[i];
-      this.ctx.fillStyle = log_line.color;
-      this.ctx.fillText(log_line.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
-      this.ctx.strokeText(log_line.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
+      const logLine = this.chat[i];
+      this.ctx.fillStyle = logLine.color ? logLine.color : "grey";
+      this.ctx.fillText(logLine.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
+      this.ctx.strokeText(logLine.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
     }
   }
 }
