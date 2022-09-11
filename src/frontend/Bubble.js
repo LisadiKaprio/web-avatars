@@ -17,6 +17,8 @@ class Bubble {
         gameObject: this,
         src: config.src,
         mask: config.mask,
+        cutSize: config.cutSize,
+        displaySize: config.displaySize,
         color: this.color,
         animations: config.animations || {
           idle: new Animation({
@@ -45,6 +47,7 @@ class Bubble {
 
     // Customization
     this.speed = config.speed || 2.0;
+    this.opacity = 1.0;
   }
 
   advanceBehaviour() {
@@ -81,6 +84,7 @@ class Bubble {
       const oscillation = Math.sin(cycleProgress * Math.PI * 2);
       this.y -= oscillation * this.speed;
     } else if (action.type == "dissolve") {
+      this.opacity = this.actionTime / action.time;
       //this.y -= this.speed;
       // TODO: disappear
     }
@@ -93,6 +97,7 @@ class Bubble {
       xOffset =
         -this.x + this.attachedTo.x + this.attachedTo.sprite.displaySize / 2;
     }
+    ctx.globalAlpha = this.opacity;
     if (this.type == "text") {
       ctx.fillStyle = this.color;
       ctx.fillText(this.text, this.x + xOffset, this.y);
@@ -102,5 +107,6 @@ class Bubble {
       console.error("Unhandled bubble type");
       console.error(this);
     }
+    ctx.globalAlpha = 1.0;
   }
 }

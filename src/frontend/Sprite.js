@@ -25,7 +25,6 @@ class Sprite {
       util.asDrawable(config.src).then(loaded);
     }
 
-    this.isEmote = config.isEmote || false;
     this.cutSize = config.cutSize || 300;
     this.displaySize = config.displaySize || 150;
 
@@ -43,8 +42,14 @@ class Sprite {
     this.animationFrameLimit = config.animationFrameLimit || 25;
     this.animationFrameProgress = this.animationFrameLimit;
 
+    this.mirrored = false;
     // reference the game object
     this.gameObject = config.gameObject;
+  }
+
+  setAnimation(animation) {
+    this.currentAnimation = animation;
+    this.currentAnimationFrame = 0;
   }
 
   // get current animation frame
@@ -69,14 +74,8 @@ class Sprite {
     if (this.frame == undefined) {
       if (this.animations[this.currentAnimation].doesLoop) {
         this.currentAnimationFrame = 0;
-      } else if (this.gameObject.actionTime) {
-        this.gameObject.changeBehaviour();
-        this.currentAnimation = "idle";
-        this.currentAnimationFrame = 0;
       } else {
-        this.gameObject.emitEvent("AvatarTalkingComplete");
-        this.gameObject.changeBehaviour(BEHAVIOUR.IDLE);
-        this.currentAnimation = "idle";
+        this.gameObject.endAnimation();
         this.currentAnimationFrame = 0;
       }
     }
@@ -89,6 +88,7 @@ class Sprite {
     const x = this.gameObject.x + xOffset;
     const y = this.gameObject.y + yOffset;
 
+    if (!this.frame) debugger;
     const [frameX, frameY] = this.frame;
 
     // if(this.drawable){
@@ -99,26 +99,94 @@ class Sprite {
     const image = this.drawable ? this.drawable.image() : null;
     // if there is something avaiable to be drawn
     if (image) {
+      let oldTransform = ctx.getTransform();
+      if (this.mirrored) {
+        ctx.translate(x + this.displaySize, y);
+        ctx.scale(-1, 1);
+      } else {
+        ctx.translate(x, y);
+      }
+
       ctx.drawImage(
         image,
         // left cut, right cut,
-        // had a bug where frameX and frameY were switched around unexpectedly
-        // might need to go back and fix again if bug reoccurs
-        // (no)
         frameX * this.cutSize,
         frameY * this.cutSize,
         // size of the cut on x and y
         this.cutSize,
         this.cutSize,
         // position comes in here
-        x,
-        y,
+        0,
+        0,
         // display size
         this.displaySize,
         this.displaySize
       );
+      ctx.setTransform(oldTransform);
     }
-
     this.updateAnimationProgress();
   }
 }
+
+const ANIMATIONS = {
+  idle: new Animation({
+    frames: [
+      [0, 0],
+      [1, 0],
+    ],
+    doesLoop: true,
+  }),
+  talk: new Animation({
+    frames: [
+      [1, 1],
+      [2, 1],
+      [0, 2],
+      [1, 2],
+      [0, 2],
+      [1, 2],
+      [0, 2],
+      [1, 2],
+      [0, 2],
+      [1, 2],
+      [0, 2],
+      [2, 1],
+      [1, 1],
+      [0, 1],
+    ],
+    doesLoop: false,
+  }),
+  gain: new Animation({
+    frames: [
+      [0, 1],
+      [1, 1],
+      [3, 1],
+      [2, 2],
+      [3, 2],
+      [3, 1],
+      [1, 1],
+      [0, 1],
+    ],
+    doesLoop: false,
+  }),
+  consume: new Animation({
+    frames: [
+      [2, 0],
+      [0, 3],
+      [1, 3],
+      [2, 3],
+      [3, 3],
+      [2, 3],
+      [1, 3],
+      [0, 3],
+      [2, 0],
+    ],
+    doesLoop: false,
+  }),
+  hug: new Animation({
+    frames: [
+      [0, 4],
+      [1, 4],
+    ],
+    doesLoop: true,
+  }),
+};

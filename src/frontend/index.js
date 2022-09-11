@@ -1,10 +1,11 @@
 "use strict";
 
 const UPDATE_PERIOD = 1000;
+let world;
 
 async function main() {
   // create a new World instance
-  let world = new World({
+  world = new World({
     element: document.querySelector(".game-container"),
   });
 

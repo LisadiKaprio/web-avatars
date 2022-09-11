@@ -41,6 +41,7 @@ class World {
       // create a new user avatar.
       if (!this.userAvatars[name]) {
         this.userAvatars[name] = createNewUserAvatar(
+          this,
           user,
           Math.random() * this.canvas.width,
           this.time
@@ -55,11 +56,30 @@ class World {
       this.handleCommands(user);
 
       // handle user messages
-      if (messages[name]) {
+      if (messages[name] || emotes.some((emote) => emote.name == name)) {
         let avatar = this.userAvatars[name];
-        avatar.changeBehaviour("talk");
+        avatar.pushMotivation(BEHAVIOURS.talk);
+        if (!avatar.isActive) {
+          this.chat.push({
+            text: `Welcome back ${name}!`,
+            color: users[user].color,
+          });
+        }
+        avatar.isActive = true;
         avatar.lastChatTime = this.time;
-        this.renderedBubbles.push(createTextBubble(avatar, "+15 xp"));
+        let xpSprite = {
+          src: "images/bubble/xp.png",
+          cutSize: 150,
+          displaySize: 100,
+        };
+        this.renderedBubbles.push(
+          createAdvancedBubble({
+            type: "icon",
+            x: avatar.x,
+            y: avatar.y,
+            spriteInfo: xpSprite,
+          })
+        );
 
         // log the message in chat and add a message bubble
         if (MESSAGES_ALL_OVER_THE_PLACE) {
@@ -93,6 +113,31 @@ class World {
     const commands = user.unhandledCommands;
     if (commands) {
       for (const { command, args } of commands) {
+        let parsed_args = args.match(/\w+/g);
+        if (command == "hug") {
+          const toHug = parsed_args
+            ? parsed_args
+            : [
+                Object.keys(this.userAvatars)
+                  .filter((name) => name != user.name)
+                  .random(),
+              ];
+          const userAvatar = this.userAvatars[user.name];
+          let behaviours = [];
+          for (const name of toHug) {
+            const whoToHug = this.userAvatars[name];
+            if (whoToHug) {
+              behaviours.push(
+                new Behaviour("hug", [{ type: ACTIONS.hug, who: whoToHug }])
+              );
+            }
+          }
+          if (behaviours.length > 0) {
+            for (const behaviour of behaviours) {
+              userAvatar.pushMotivation(behaviour);
+            }
+          }
+        }
         if (command == "whoami") {
           this.chat.push({
             text: `you are ${user.name}`,
@@ -105,6 +150,14 @@ class World {
           });
         } else if (command == "dbg") {
           console.log(user);
+          const userAvatar = this.userAvatars[user.name];
+          this.chat.push({
+            text: `${
+              user.name
+            }'s behaviour: ${userAvatar.currentBehaviour.dbg()}, after that: ${JSON.stringify(
+              userAvatar.motivation.map((motivation) => motivation.name)
+            )}`,
+          });
         } else {
           // Ignore unhandled commands.
         }
@@ -131,7 +184,7 @@ class World {
         userAvatar.isActive &&
         this.time - userAvatar.lastChatTime >= INACTIVE_TIME
       ) {
-        userAvatar.changeBehaviour("sleep");
+        userAvatar.changeBehaviour(BEHAVIOURS.sleep);
         userAvatar.isActive = false;
         this.chat.push({
           text: `${userAvatar.name} hasn't written much in chat for a while now... Seems like they fell asleep!`,
@@ -177,16 +230,16 @@ class World {
     this.ctx.strokeStyle = CHAT.outlineColor;
 
     for (let i = 0; i < this.chat.length; i++) {
-      const log_line = this.chat[i];
-      this.ctx.fillStyle = log_line.color;
-      this.ctx.fillText(log_line.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
-      this.ctx.strokeText(log_line.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
+      const logLine = this.chat[i];
+      this.ctx.fillStyle = logLine.color ? logLine.color : "grey";
+      this.ctx.fillText(logLine.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
+      this.ctx.strokeText(logLine.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
     }
   }
 }
 
-function createNewUserAvatar(user, x, time) {
-  let avatar = new Avatar({
+function createNewUserAvatar(world, user, x, time) {
+  let avatar = new Avatar(world, {
     name: user.name,
     color: user.color,
     x: x,
@@ -212,14 +265,17 @@ function createTextBubble(origin, contents) {
 }
 
 function createAdvancedBubble(config) {
-  let xOffset = config.sprite ? config.sprite.displaySize / 2 : 0;
+  let offset = config.spriteInfo ? config.spriteInfo.displaySize / 2 : 0;
   const bubble = new Bubble({
     type: config.type,
     //attachedTo: origin,
-    x: config.x + xOffset,
-    y: config.y - 0,
+    x: config.x,
+    y: config.y - offset,
     text: config.text,
-    behaviourLoop: config.behaviourLoop || "idle",
+    displaySize: config.spriteInfo.displaySize,
+    cutSize: config.spriteInfo.cutSize,
+    src: config.spriteInfo.src,
+    behaviourLoop: config.behaviourLoop,
   });
   return bubble;
 }

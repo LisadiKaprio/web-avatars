@@ -194,9 +194,8 @@ client.on("message", (channel, tags, message, self) => {
       } else {
         newMessages[username] = [message];
       }
-
-      // counts messages written by the user
-      // part of the game?
+    } else if (!detectedCommand) {
+      // counts messages written by the user and gives xp
       users[username].messageCount += 1;
       users[username].xp += 15;
     }
