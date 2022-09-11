@@ -101,8 +101,21 @@ class Avatar {
     // check for the ordering
     // instant actions
     if (!behaviour.actions) debugger;
-    if (behaviour.name == "talk" || behaviour.name == "hug") {
+    // swap current behaviour to talk or hug immediately, but only if not hugging already.
+    if (
+      (!(
+        this.currentBehaviour.name == "hug" ||
+        this.currentBehaviour.name == "hugged"
+      ) &&
+        behaviour.name == "talk") ||
+      behaviour.name == "hug"
+    ) {
       // didn't finish action, do it later
+      this.motivation.push(this.currentBehaviour);
+      this.changeBehaviour(behaviour);
+      return;
+    } else if (this.currentBehaviour.name == "idle") {
+      // idle is the least urgent behaviour.
       this.motivation.push(this.currentBehaviour);
       this.changeBehaviour(behaviour);
       return;
@@ -134,7 +147,7 @@ class Avatar {
     }
 
     let action = this.currentBehaviour.actions[this.behaviourLoopIndex];
-    this.sprite.currentAnimation = "idle";
+    this.sprite.setAnimation("idle");
     if (action.type == "walk") {
       this.actionTime = Math.random() * this.walkingTime;
       this.direction = action.direction;
@@ -142,7 +155,7 @@ class Avatar {
       this.actionTime = Math.random() * this.standTime;
     } else if (action.type == "talk") {
       // play out all the frames of animation, then animation advances to next behaviour
-      this.sprite.currentAnimation = "talk";
+      this.sprite.setAnimation("talk");
       this.actionTime = 9999;
     } else if (action.type == "hug") {
       const whoToHug = action.who;
@@ -162,7 +175,7 @@ class Avatar {
         });
       } else {
         // close enough for a hug, change animation of this and the other
-        this.sprite.currentAnimation = "hug";
+        this.sprite.setAnimation("hug");
         this.actionTime = 100;
         if (whoToHug.currentBehaviour.name != "hug") {
           const oppositeDirection = this.direction == "left" ? "right" : "left";
@@ -175,7 +188,7 @@ class Avatar {
         // TODO: wait if who we want to hug is doing something
       }
     } else if (action.type == "hugged") {
-      this.sprite.currentAnimation = "hug";
+      this.sprite.setAnimation("hug");
       this.actionTime = 100;
     } else if (action.type == "go") {
       // update will advance behaviour

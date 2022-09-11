@@ -46,6 +46,11 @@ class Sprite {
     this.gameObject = config.gameObject;
   }
 
+  setAnimation(animation) {
+    this.currentAnimation = animation;
+    this.currentAnimationFrame = 0;
+  }
+
   // get current animation frame
   get frame() {
     return this.animations[this.currentAnimation].frames[
