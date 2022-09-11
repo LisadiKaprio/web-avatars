@@ -97,8 +97,6 @@ class Avatar {
 
   pushMotivation(behaviour) {
     // check for the ordering
-    // instant actions
-    if (!behaviour.actions) debugger;
 
     // most urgent behaviours don't get swapped out
     if (
@@ -109,6 +107,7 @@ class Avatar {
       return;
     }
 
+    // instant actions
     // swap current behaviour to talk or hug immediately
     if (behaviour.name == "talk" || behaviour.name == "hug") {
       // didn't finish action, do it later
@@ -134,7 +133,6 @@ class Avatar {
   }
 
   changeBehaviour(behaviour) {
-    if (!behaviour.actions) debugger;
     this.currentBehaviour = behaviour;
     this.behaviourLoopIndex = -1;
     this.advanceBehaviour();
@@ -212,7 +210,6 @@ const ACTIONS = {
 
 class Behaviour {
   constructor(name, actions) {
-    if (!actions) debugger;
     this.name = name;
     this.actions = actions;
   }
@@ -234,11 +231,9 @@ class Behaviour {
   }
 
   dbg() {
-    let actions = ": ";
-    for (const action of this.actions) {
-      actions += action.type + ", ";
-    }
-    return this.name + actions;
+    return `${this.name} (${this.actions
+      .map((action) => action.type)
+      .join(", ")})`;
   }
 }
 

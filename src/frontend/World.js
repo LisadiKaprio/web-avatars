@@ -121,8 +121,6 @@ class World {
                   .filter((name) => name != user.name)
                   .random(),
               ];
-
-          this.chat.push({ text: `${command} ${toHug}` });
           const userAvatar = this.userAvatars[user.name];
           let behaviours = [];
           for (const name of toHug) {
@@ -153,7 +151,9 @@ class World {
           console.log(user);
           const userAvatar = this.userAvatars[user.name];
           this.chat.push({
-            text: `${userAvatar.currentBehaviour.dbg()} | ${JSON.stringify(
+            text: `${
+              user.name
+            }'s behaviour: ${userAvatar.currentBehaviour.dbg()}, after that: ${JSON.stringify(
               userAvatar.motivation.map((motivation) => motivation.name)
             )}`,
           });
