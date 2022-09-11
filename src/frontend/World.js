@@ -41,6 +41,7 @@ class World {
       // create a new user avatar.
       if (!this.userAvatars[name]) {
         this.userAvatars[name] = createNewUserAvatar(
+          this,
           user,
           Math.random() * this.canvas.width,
           this.time
@@ -237,8 +238,8 @@ class World {
   }
 }
 
-function createNewUserAvatar(user, x, time) {
-  let avatar = new Avatar({
+function createNewUserAvatar(world, user, x, time) {
+  let avatar = new Avatar(world, {
     name: user.name,
     color: user.color,
     x: x,

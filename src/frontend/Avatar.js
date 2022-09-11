@@ -1,9 +1,10 @@
 "use strict";
 
 class Avatar {
-  constructor(config) {
+  constructor(world, config) {
     // username
     this.name = config.name === undefined ? "NoName" : config.name;
+    this.world = world;
     // define and pass in position, or else default to 0
     this.x = config.x || 0;
     this.y = config.y || 950;
@@ -184,6 +185,20 @@ class Avatar {
             new Behaviour("hugged", [
               { type: "hugged", mirrored: !this.sprite.mirrored },
             ])
+          );
+          const heartSize = 100;
+          const heartSprite = {
+            src: "images/bubble/action-items.png",
+            cutSize: 100,
+            displaySize: heartSize,
+          };
+          this.world.renderedBubbles.push(
+            createAdvancedBubble({
+              type: "icon",
+              x: (this.x + whoToHug.x) / 2,
+              y: this.y - 20,
+              spriteInfo: heartSprite,
+            })
           );
         } else {
           this.actionTime = 50;
