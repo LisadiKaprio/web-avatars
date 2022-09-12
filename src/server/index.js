@@ -138,10 +138,12 @@ client.on("message", (channel, tags, message, self) => {
 
     const detectedCommand = message.match(/^!([a-z]+)($|\s.*)/);
 
+    ///
     if (detectedCommand) {
       const command = detectedCommand[1];
       const args = detectedCommand[2].trim(); //.split(/\s+/)
 
+      //
       if (tags.mod || tags.badges?.broadcaster) {
         // MOD/BROADCASTER COMMANDS
         // !startWeb
@@ -169,6 +171,11 @@ client.on("message", (channel, tags, message, self) => {
             );
           }
         } else {
+        }
+      }
+      //
+
+      
           // Pass all the unknown commands (starting with ! ) to the frontend
           // in hopes that it knows what to do with them.
           if (!users[username].unhandledCommands) {
@@ -184,9 +191,23 @@ client.on("message", (channel, tags, message, self) => {
               args: args,
             });
           }
-        }
+
+      if (!users[username].unhandledCommands) {
+        users[username].unhandledCommands = [
+          {
+            command: command,
+            args: args,
+          },
+        ];
+      } else {
+        users[username].unhandledCommands.push({
+          command: command,
+          args: args,
+        });
       }
     }
+///
+
     if (!tags.emotes && !detectedCommand) {
       // NOT A COMMAND
       if (newMessages[username]) {
