@@ -1,22 +1,30 @@
 ## misc
 
-[] log window: "Welcome back %username!" after the user has texted again after falling asleep
+[] *important!* log window: "Welcome back %username!" after the user has texted again after falling asleep
 
 # user-to-user interactions
 
-[] *important!* !hug %username
+## hug 
 
-  -> [] user who typed it floats over to the user he/she wants to hug, then they both perform a hug animation (the one who's on the left performs hug-right and the one who's on the right performs hug-left animation), then they continue on with their routine
+[] deduct 30 xp points when hugging
 
-  -> [] should not be possible if one of the users is already performing a labor (hunt, fish, gather, mine or build/steal)
+[] log window: "%username spends 30 xp to hug %username!"
 
-  -> [] if the users perform a talking or consuming animation, it should stop
+[] after hugging, avatars should walk off in separate directions (not in the same one)
+
+[] *important!* avatar should walk around 2 times faster when going for a hug
+
+[] fix bug?
+
+## bonk
 
 [] *important!* !bonk %username
 
-  -> very same as the previous one, just with a different set of animations
+  -> [] user who typed it floats over to the user he/she wants to bonk, then they both perform a bonk animation , then they continue on with their routine
 
-  -> LISA TODO [] bonk user sprites
+  -> [] be able to mirror the sprites i drew through script
+
+  -> [] deduct 60 xp points when bonking
 
 
 # labors
@@ -76,9 +84,13 @@
 
 # misc
 
+[] !give xp to someone else
+
+[] RENAME xp to coins?
+
 [] !lurk
 
-  -> LISA TODO: sleeping/hiding user sprites
+  -> LISA TODO: [] sleeping/hiding user sprites
 
   -> log window: "%username has something better to do. Have a nice lurk!"
 
@@ -121,3 +133,12 @@
 [x] (stats) amount of xp!
 
 [x] *important!* reduce size by 2
+
+  -> LISA TODO [x] bonk user sprites
+
+  [x] *important!* !hug %username
+
+  -> [x] user who typed it floats over to the user he/she wants to hug, then they both perform a hug animation (the one who's on the left performs hug-right and the one who's on the right performs hug-left animation), then they continue on with their routine
+
+
+  -> [x] if the users perform a talking or consuming animation, it should stop
