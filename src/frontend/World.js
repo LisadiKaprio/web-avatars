@@ -125,6 +125,7 @@ class World {
           const userAvatar = this.userAvatars[user.name];
           let behaviours = [];
           for (const name of toHug) {
+            if (name == user.name) continue;
             const whoToHug = this.userAvatars[name];
             if (whoToHug) {
               behaviours.push(

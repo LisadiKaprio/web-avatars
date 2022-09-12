@@ -2,6 +2,12 @@
 
 [] *important!* log window: "Welcome back %username!" after the user has texted again after falling asleep
 
+[] *important!* save display name, be able to !hug the display name
+
+[] be able to hug with @
+
+[] be able to hug with randomcase (toLowercase)
+
 # user-to-user interactions
 
 ## hug 

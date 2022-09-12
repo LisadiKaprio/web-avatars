@@ -192,19 +192,6 @@ client.on("message", (channel, tags, message, self) => {
             });
           }
 
-      if (!users[username].unhandledCommands) {
-        users[username].unhandledCommands = [
-          {
-            command: command,
-            args: args,
-          },
-        ];
-      } else {
-        users[username].unhandledCommands.push({
-          command: command,
-          args: args,
-        });
-      }
     }
 ///
 
