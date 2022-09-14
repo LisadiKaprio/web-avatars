@@ -112,11 +112,10 @@ class World {
   handleCommands(user) {
     const commands = user.unhandledCommands;
     if (commands) {
-      for (const { command, args } of commands) {
-        let parsed_args = args.match(/\w+/g);
+      for (const { command, args, argUsers } of commands) {
         if (command == "hug") {
-          const toHug = parsed_args
-            ? parsed_args
+          const toHug = argUsers
+            ? argUsers
             : [
                 Object.keys(this.userAvatars)
                   .filter((name) => name != user.name)
@@ -242,6 +241,7 @@ class World {
 function createNewUserAvatar(world, user, x, time) {
   let avatar = new Avatar(world, {
     name: user.name,
+    displayName: user.displayName,
     color: user.color,
     x: x,
     y: 850,

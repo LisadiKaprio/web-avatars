@@ -4,6 +4,8 @@ class Avatar {
   constructor(world, config) {
     // username
     this.name = config.name === undefined ? "NoName" : config.name;
+    this.displayName =
+      config.displayName === undefined ? "NoName" : config.displayName;
     this.world = world;
     // define and pass in position, or else default to 0
     this.x = config.x || 0;
@@ -84,7 +86,7 @@ class Avatar {
     this.sprite.draw(ctx);
     ctx.fillStyle = this.color;
     ctx.fillText(
-      this.name,
+      this.displayName,
       this.x + this.sprite.displaySize / 2,
       this.y + this.sprite.displaySize + 3
     );
