@@ -4,22 +4,24 @@ const tmi = require("tmi.js");
 const fs = require("fs");
 
 //= = = my own variables = = =
-
 // CHANNEL NAME
 const channelName = "LisadiKaprio";
 // is bot active?
 const botActive = true;
-//start bot
-const startMessage = "startWeb";
-//end bot
-const endMessage = "endWeb";
-//clear users in this session
-const clearUsers = "clearUsers";
 
-// = = =
+const COMMANDS = {
+  //start bot
+  botStart: "start",
+  //end bot
+  botEnd: "exit",
+  //clear users in this session
+  clearUsers: "clearUsers",
+  deleteUser: "deleteUser",
+  deleteEveryUser: "deleteEveryUser",
+  messageCount: "messages",
+};
 
 // = = = construction: users database in data/users = = =
-
 const USER_ALLOW_LIST = [];
 const DATA_DIR = "./data";
 const USER_DATA_DIR = DATA_DIR + "/users";
@@ -50,12 +52,45 @@ function deleteUser(username) {
   fs.rmSync(userFile(username));
 }
 
+function deleteEveryUser() {
+  const usernames = Object.keys(users);
+  for (const username of usernames) {
+    deleteUser(username);
+  }
+}
+
 function saveUser(username) {
   fs.writeFileSync(userFile(username), JSON.stringify(users[username]));
 }
 
-// = = =
+function putUserIntoObject(object, tags) {
+  // WHAT's IN THE USER?
+  return {
+    name: tags.username,
+    displayName: tags["display-name"],
+    messageCount: 0,
+    color: tags.color,
+    xp: 0,
+  };
+}
 
+function searchUser(query) {
+  if (query.startsWith("@")) {
+    query = query.replace("@", "");
+  }
+  let user = users[query];
+  if (!user) {
+    for (const [username, userTags] of Object.entries(users)) {
+      if (userTags.displayName == query) {
+        return username;
+      }
+    }
+  } else {
+    return query;
+  }
+}
+
+// = = = tmi = = =
 // tmi client options
 const options = {
   options: {
@@ -74,28 +109,12 @@ const client = new tmi.client(options);
 // connect the client to the chat
 client.connect();
 
-// WHEN client is connected to chat
+// when client is connected to chat
 client.on("connected", (address, port) => {
   console.log("Connected to chat!");
 });
 
-// hmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
-// // load the browser page with the game world on it
-// (function(){
-//     // create a new Overworld instance
-//     const overworld = new Overworld({
-//         element: document.querySelector(".game-container")
-//     });
-//     // make it do the do
-//     overworld.init();
-// })
-
-// taken straight from tmijs.com
-// // channel = my channel?
-// // tags = user who wrote the message
-// // // [display-name] =
-// // message = the string of the message itself
-// // self = ???
+// when client recieves a normal chat message
 client.on("message", (channel, tags, message, self) => {
   // extract the username out of the tags?? T_T
   // i don't undewstand how this wowks but ok
@@ -104,6 +123,7 @@ client.on("message", (channel, tags, message, self) => {
   // kirino's explanation:
   // it extracts what's in {} out of what's on the right
   const { username } = tags;
+  const displayName = tags["display-name"];
 
   if (USER_ALLOW_LIST.length > 0 && !USER_ALLOW_LIST.includes(username)) {
     return;
@@ -113,8 +133,9 @@ client.on("message", (channel, tags, message, self) => {
     // detect user chatting as a participator of the game
     // first, save the user in the db if they weren't yet
     if (!(username in users)) {
-      putUserIntoObject(users, tags);
+      users[username] = putUserIntoObject(users, tags);
     }
+    users[username].displayName = displayName;
 
     // same, but for new users in current session aka current stream
     if (!(username in activeUsers)) {
@@ -138,93 +159,86 @@ client.on("message", (channel, tags, message, self) => {
 
     const detectedCommand = message.match(/^!([a-z]+)($|\s.*)/);
 
-    ///
     if (detectedCommand) {
       const command = detectedCommand[1];
-      const args = detectedCommand[2].trim(); //.split(/\s+/)
-
-      //
+      const args = detectedCommand[2].split(/\s+/);
+      const argUsers = args
+        .map((arg) => {
+          const username = searchUser(arg);
+          return username;
+        })
+        .filter((user) => user != undefined);
+      let handled = true;
       if (tags.mod || tags.badges?.broadcaster) {
         // MOD/BROADCASTER COMMANDS
-        // !startWeb
-        if (message === clearUsers) {
+        if (message === COMMANDS.clearUsers) {
           activeUsers = [];
-          //needs something in frontend that reacts to that too and deletes gameobjects
-        } else if (message === startMessage) {
+          // TODO: needs something in frontend that reacts to that too and deletes gameobjects
+        } else if (message === COMMANDS.botStart) {
           botActive = true;
-        } else if (message === endMessage) {
-          // !endWeb
+        } else if (message === COMMANDS.botEnd) {
           botActive = false;
-        } else if (command === "delete") {
-          // !delete fab_77
-          for (const tmpUsername of args) {
-            if (tmpUsername in users) {
-              deleteUser(tmpUsername);
-            }
+        } else if (command === COMMANDS.deleteUser) {
+          for (const username of argUsers) {
+            deleteUser(username);
           }
-        } else if (command === "messagecount" && args.length === 1) {
-          // !messagecount fab_77
-          const tmpUsername = args[0];
-          if (tmpUsername in users) {
+        } else if (
+          command === COMMANDS.deleteEveryUser &&
+          displayName === channelName
+        ) {
+          deleteEveryUser();
+        } else if (command === COMMANDS.messageCount) {
+          for (const username of argUsers) {
             console.log(
-              `${tmpUsername} has written ${users[tmpUsername].messageCount} messages`
+              `${users[username].displayName} has written ${users[username].messageCount} messages`
             );
           }
         } else {
+          handled = false;
         }
       }
-      //
 
-      
-          // Pass all the unknown commands (starting with ! ) to the frontend
-          // in hopes that it knows what to do with them.
-          if (!users[username].unhandledCommands) {
-            users[username].unhandledCommands = [
-              {
-                command: command,
-                args: args,
-              },
-            ];
-          } else {
-            users[username].unhandledCommands.push({
+      // not handled command
+      if (!handled) {
+        // Pass all the unknown commands (starting with ! ) to the frontend
+        // in hopes that it knows what to do with them.
+        if (!users[username].unhandledCommands) {
+          users[username].unhandledCommands = [
+            {
               command: command,
               args: args,
-            });
-          }
-
-    }
-///
-
-    if (!tags.emotes && !detectedCommand) {
-      // NOT A COMMAND
-      if (newMessages[username]) {
-        newMessages[username].push(message);
-      } else {
-        newMessages[username] = [message];
+              argUsers: argUsers,
+            },
+          ];
+        } else {
+          users[username].unhandledCommands.push({
+            command: command,
+            args: args,
+            argUsers: argUsers,
+          });
+        }
       }
-    } else if (!detectedCommand) {
-      // counts messages written by the user and gives xp
-      users[username].messageCount += 1;
-      users[username].xp += 15;
-    }
 
-    // save that as a json file then
-    saveUser(username);
+      if (!tags.emotes && !detectedCommand) {
+        // NOT A COMMAND
+        if (newMessages[username]) {
+          newMessages[username].push(message);
+        } else {
+          newMessages[username] = [message];
+        }
+      } else if (!detectedCommand) {
+        // counts messages written by the user and gives xp
+        users[username].messageCount += 1;
+        users[username].xp += 15;
+      }
+
+      // save that as a json file then
+      saveUser(username);
+    }
   }
 });
 
-function putUserIntoObject(object, tags) {
-  // WHAT's IN THE USER?
-  object[tags.username] = {
-    name: tags.username,
-    messageCount: 0,
-    color: tags.color,
-    xp: 0,
-  };
-}
-
 // COMMUNICATION WITH THE FRONTEND
-
 const express = require("express");
 const { URLSearchParams } = require("url");
 const app = express();
