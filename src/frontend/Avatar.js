@@ -43,7 +43,7 @@ class Avatar {
     this.idleBehaviour = BEHAVIOURS.idle;
 
     this.motivation = [];
-    this.currentBehaviour = config.behaviourLoop || this.idleBehaviour;
+    this.currentBehaviour = config.currentBehaviour || this.idleBehaviour;
     this.behaviourLoopIndex = 0;
 
     this.isActive = true;
@@ -128,7 +128,11 @@ class Avatar {
 
   popMotivation() {
     if (this.motivation.length <= 0) {
-      this.pushMotivation(this.idleBehaviour);
+      if (!this.isActive) {
+        this.pushMotivation(BEHAVIOURS.sleep);
+      } else {
+        this.pushMotivation(this.idleBehaviour);
+      }
     }
     this.changeBehaviour(this.motivation.pop());
   }
@@ -154,7 +158,7 @@ class Avatar {
       this.direction = action.direction;
     } else if (action.type == ACTIONS.stand) {
       this.actionTime = Math.random() * this.standTime;
-    } else if (action.type == ACTIONS.walk) {
+    } else if (action.type == ACTIONS.talk) {
       // play out all the frames of animation, then animation advances to next behaviour
       this.sprite.setAnimation("talk");
       this.actionTime = 9999;
