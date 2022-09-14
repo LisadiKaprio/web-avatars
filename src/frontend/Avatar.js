@@ -25,9 +25,9 @@ class Avatar {
         gain: ANIMATIONS.gain,
         consume: ANIMATIONS.consume,
         hug: ANIMATIONS.hug,
+        bonk: ANIMATIONS.bonk,
+        bonked: ANIMATIONS.bonked,
       },
-      // "bonk give left": [ [2,0], [0,5], [1,5], [0,5], [2,0] ],
-      // "bonk receive left": [ [0,1], [1,1], [2,5], [3,5], [0,6], [1,6], [2,6], [1,6], [2,6], [1,6], [2,6]],
     });
 
     this.actionTime = config.actionTime === undefined ? 24 : config.actionTime;
@@ -56,7 +56,7 @@ class Avatar {
       this.advanceBehaviour();
     }
     let action = this.currentBehaviour.actions[this.behaviourLoopIndex];
-    if (action.type == "walk") {
+    if (action.type == ACTIONS.walk) {
       if (this.x >= 1920 - 150) {
         this.direction = "left";
       }
@@ -68,7 +68,7 @@ class Avatar {
       } else if (this.direction == "right") {
         this.x += this.speed;
       }
-    } else if (action.type == "go") {
+    } else if (action.type == ACTIONS.go) {
       // TODO: only done for x.
       const deltaX = action.x - this.x;
       if (deltaX > this.speed + 0.1) {
@@ -102,10 +102,7 @@ class Avatar {
     // check for the ordering
 
     // most urgent behaviours don't get swapped out
-    if (
-      this.currentBehaviour.name == "hug" ||
-      this.currentBehaviour.name == "hugged"
-    ) {
+    if (!this.canSwapBehaviour()) {
       this.motivation.push(behaviour);
       return;
     }
@@ -151,72 +148,114 @@ class Avatar {
 
     let action = this.currentBehaviour.actions[this.behaviourLoopIndex];
     this.sprite.setAnimation("idle");
-    if (action.type == "walk") {
+    if (action.type == ACTIONS.walk) {
       this.actionTime = Math.random() * this.walkingTime;
       this.direction = action.direction;
-    } else if (action.type == "stand") {
+    } else if (action.type == ACTIONS.stand) {
       this.actionTime = Math.random() * this.standTime;
-    } else if (action.type == "talk") {
+    } else if (action.type == ACTIONS.walk) {
       // play out all the frames of animation, then animation advances to next behaviour
       this.sprite.setAnimation("talk");
       this.actionTime = 9999;
-    } else if (action.type == "hug") {
-      const whoToHug = action.who;
-      // TODO: only done for x.
-      const distance = whoToHug.x - this.x;
-      // half of this sprite and half of the other sprite
-      const padding =
-        (this.sprite.displaySize + whoToHug.sprite.displaySize) / 3;
-      if (Math.abs(distance) > padding + 10) {
-        // need to go closer to who we want to hug.
-        // TODO: if too close maybe need to step away a little bit.
-        this.actionTime = 100;
-        this.currentBehaviour.insert(this.behaviourLoopIndex, {
-          type: "go",
-          x: whoToHug.x - padding * Math.sign(distance),
-          y: whoToHug.y,
-        });
-      } else {
-        if (whoToHug.currentBehaviour.name != "hug") {
+    } else if (action.type == ACTIONS.hug) {
+      if (!this.getCloser(action.who)) {
+        if (action.who.canSwapBehaviour()) {
           // close enough for a hug, change animation of this and the other
           this.sprite.setAnimation("hug");
           this.actionTime = 100;
-          this.sprite.mirrored = this.x < whoToHug.x;
+          this.sprite.mirrored = this.x < action.who.x;
           // sets sprite mirrored here, doesn't reset it
-          whoToHug.changeBehaviour(
+          action.who.changeBehaviour(
             new Behaviour("hugged", [
               { type: "hugged", mirrored: !this.sprite.mirrored },
             ])
           );
-          const heartSize = 100;
-          const heartSprite = {
-            src: "images/bubble/action-items.png",
-            cutSize: 100,
-            displaySize: heartSize,
-          };
-          this.world.renderedBubbles.push(
-            createAdvancedBubble({
-              type: "icon",
-              x: (this.x + whoToHug.x) / 2,
-              y: this.y - 20,
-              spriteInfo: heartSprite,
-            })
-          );
+          this.showIcon();
         } else {
-          this.actionTime = 50;
+          this.actionTime = 25;
           this.currentBehaviour.insert(this.behaviourLoopIndex, {
             type: "stand",
           });
         }
-        // TODO: wait if who we want to hug is doing something
       }
-    } else if (action.type == "hugged") {
+    } else if (action.type == ACTIONS.hugged) {
       this.sprite.mirrored = action.mirrored;
       this.sprite.setAnimation("hug");
       this.actionTime = 100;
-    } else if (action.type == "go") {
+    } else if (action.type == ACTIONS.bonk) {
+      if (!this.getCloser(action.who)) {
+        if (action.who.canSwapBehaviour()) {
+          // close enough for a hug, change animation of this and the other
+          this.sprite.setAnimation("bonk");
+          this.actionTime = 300;
+          this.sprite.mirrored = this.x < action.who.x;
+          // sets sprite mirrored here, doesn't reset it
+          action.who.changeBehaviour(
+            new Behaviour("bonked", [
+              { type: "bonked", mirrored: this.sprite.mirrored },
+            ])
+          );
+        } else {
+          this.actionTime = 25;
+          this.currentBehaviour.insert(this.behaviourLoopIndex, {
+            type: "stand",
+          });
+        }
+      }
+    } else if (action.type == ACTIONS.bonked) {
+      this.sprite.mirrored = action.mirrored;
+      this.sprite.setAnimation("bonked");
+      this.actionTime = 300;
+    } else if (action.type == ACTIONS.go) {
       this.actionTime = 100;
     }
+  }
+
+  canSwapBehaviour() {
+    return (
+      this.currentBehaviour.name != "hug" ||
+      this.currentBehaviour.name != "hugged" ||
+      this.currentBehaviour.name != "bonk" ||
+      this.currentBehaviour.name != "bonked"
+    );
+  }
+
+  getCloser(target) {
+    // TODO: only done for x.
+    const distance = target.x - this.x;
+    // half of this sprite and half of the other sprite
+    const targetSize = target.sprite ? target.sprite.displaySize : 0;
+    const padding = (this.sprite.displaySize + targetSize) / 3;
+    if (Math.abs(distance) > padding + 10) {
+      // need to go closer to who we want to hug.
+      // TODO: if too close maybe need to step away a little bit.
+      this.actionTime = 100;
+      this.currentBehaviour.insert(this.behaviourLoopIndex, {
+        type: "go",
+        x: target.x - padding * Math.sign(distance),
+        y: target.y,
+      });
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  showIcon(config) {
+    const iconSize = 100;
+    const iconSprite = {
+      src: "images/bubble/action-items.png",
+      cutSize: 100,
+      displaySize: iconSize,
+    };
+    this.world.renderedBubbles.push(
+      createAdvancedBubble({
+        type: "icon",
+        x: (this.x + whoToHug.x) / 2,
+        y: this.y - 20,
+        spriteInfo: iconSprite,
+      })
+    );
   }
 }
 
@@ -227,6 +266,8 @@ const ACTIONS = {
   go: "go", // x: 0, y: 0
   hug: "hug", // who: Avatar
   hugged: "hugged",
+  bonk: "bonk",
+  bonked: "bonked",
 };
 
 class Behaviour {
