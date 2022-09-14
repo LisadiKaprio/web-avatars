@@ -2,12 +2,6 @@
 
 [] *important!* log window: "Welcome back %username!" after the user has texted again after falling asleep
 
-[] *important!* save display name, be able to !hug the display name
-
-[] be able to hug with @
-
-[] be able to hug with randomcase (toLowercase)
-
 # user-to-user interactions
 
 ## hug 
@@ -20,15 +14,11 @@
 
 [] *important!* avatar should walk around 2 times faster when going for a hug
 
-[] fix bug?
-
 ## bonk
 
 [] *important!* !bonk %username
 
   -> [] user who typed it floats over to the user he/she wants to bonk, then they both perform a bonk animation , then they continue on with their routine
-
-  -> [] be able to mirror the sprites i drew through script
 
   -> [] deduct 60 xp points when bonking
 
@@ -146,5 +136,14 @@
 
   -> [x] user who typed it floats over to the user he/she wants to hug, then they both perform a hug animation (the one who's on the left performs hug-right and the one who's on the right performs hug-left animation), then they continue on with their routine
 
-
   -> [x] if the users perform a talking or consuming animation, it should stop
+
+[x] *important!* save display name, be able to !hug the display name
+
+[x] be able to hug with @
+
+[x] be able to hug with randomcase (toLowercase)
+
+[x] fix bug?
+
+-> [x] be able to mirror the sprites i drew through script
