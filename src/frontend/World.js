@@ -113,33 +113,11 @@ class World {
     const commands = user.unhandledCommands;
     if (commands) {
       for (const { command, args, argUsers } of commands) {
-        if (command == "hug") {
-          const toHug =
-            argUsers.length > 0
-              ? argUsers
-              : [
-                  Object.keys(this.userAvatars)
-                    .filter((name) => name != user.name)
-                    .random(),
-                ];
-          const userAvatar = this.userAvatars[user.name];
-          let behaviours = [];
-          for (const name of toHug) {
-            if (name == user.name) continue;
-            const whoToHug = this.userAvatars[name];
-            if (whoToHug) {
-              behaviours.push(
-                new Behaviour("hug", [{ type: ACTIONS.hug, who: whoToHug }])
-              );
-            }
-          }
-          if (behaviours.length > 0) {
-            for (const behaviour of behaviours) {
-              userAvatar.pushMotivation(behaviour);
-            }
-          }
-        }
-        if (command == "whoami") {
+        if (command == ACTIONS.hug) {
+          this.actionBetweenUsers(ACTIONS.hug, user, argUsers);
+        } else if (command == ACTIONS.bonk) {
+          this.actionBetweenUsers(ACTIONS.bonk, user, argUsers);
+        } else if (command == "whoami") {
           this.chat.push({
             text: `you are ${user.name}`,
             color: "blue",
@@ -235,6 +213,30 @@ class World {
       this.ctx.fillStyle = logLine.color ? logLine.color : "grey";
       this.ctx.fillText(logLine.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
       this.ctx.strokeText(logLine.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
+    }
+  }
+  actionBetweenUsers(action, origin, potentialTargets) {
+    const targets =
+      potentialTargets.length > 0
+        ? potentialTargets
+        : [
+            Object.keys(this.userAvatars)
+              .filter((name) => name != origin.name)
+              .random(),
+          ];
+    const userAvatar = this.userAvatars[origin.name];
+    let behaviours = [];
+    for (const name of targets) {
+      if (name == origin.name) continue;
+      const target = this.userAvatars[name];
+      if (target) {
+        behaviours.push(new Behaviour(action, [{ type: action, who: target }]));
+      }
+    }
+    if (behaviours.length > 0) {
+      for (const behaviour of behaviours) {
+        userAvatar.pushMotivation(behaviour);
+      }
     }
   }
 }

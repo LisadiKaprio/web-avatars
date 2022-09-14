@@ -189,4 +189,30 @@ const ANIMATIONS = {
     ],
     doesLoop: true,
   }),
+  bonk: new Animation({
+    frames: [
+      [2, 0],
+      [0, 5],
+      [1, 5],
+      [0, 5],
+      [2, 0],
+    ],
+    doesLoop: false,
+  }),
+  bonked: new Animation({
+    frames: [
+      [0, 1],
+      [1, 1],
+      [2, 5],
+      [3, 5],
+      [0, 6],
+      [1, 6],
+      [2, 6],
+      [1, 6],
+      [2, 6],
+      [1, 6],
+      [2, 6],
+    ],
+    doesLoop: false,
+  }),
 };
