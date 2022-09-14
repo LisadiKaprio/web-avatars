@@ -157,7 +157,7 @@ client.on("message", (channel, tags, message, self) => {
       // emote[3] = { who: kirinokirino, id: 46636}
     }
 
-    const detectedCommand = message.match(/^!([a-z]+)($|\s.*)/);
+    const detectedCommand = message.match(/^!([\w]+)($|\s.*)/);
 
     if (detectedCommand) {
       const command = detectedCommand[1];
@@ -171,12 +171,12 @@ client.on("message", (channel, tags, message, self) => {
       let handled = true;
       if (tags.mod || tags.badges?.broadcaster) {
         // MOD/BROADCASTER COMMANDS
-        if (message === COMMANDS.clearUsers) {
-          activeUsers = [];
-          // TODO: needs something in frontend that reacts to that too and deletes gameobjects
-        } else if (message === COMMANDS.botStart) {
+        if (command === COMMANDS.clearUsers) {
+          activeUsers = [username];
+          handled = false;
+        } else if (command === COMMANDS.botStart) {
           botActive = true;
-        } else if (message === COMMANDS.botEnd) {
+        } else if (command === COMMANDS.botEnd) {
           botActive = false;
         } else if (command === COMMANDS.deleteUser) {
           for (const username of argUsers) {

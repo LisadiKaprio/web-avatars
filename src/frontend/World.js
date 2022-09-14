@@ -137,6 +137,8 @@ class World {
               userAvatar.motivation.map((motivation) => motivation.name)
             )}`,
           });
+        } else if (command == "clearUsers") {
+          this.userAvatars = {};
         } else {
           // Ignore unhandled commands.
         }
