@@ -69,12 +69,13 @@ class Avatar {
         this.x += this.speed;
       }
     } else if (action.type == ACTIONS.go) {
+      const speedMultiplier = 2.0;
       // TODO: only done for x.
       const deltaX = action.x - this.x;
-      if (deltaX > this.speed + 0.1) {
-        this.x += this.speed;
-      } else if (deltaX < -(this.speed + 0.1)) {
-        this.x -= this.speed;
+      if (deltaX > this.speed * speedMultiplier + 0.1) {
+        this.x += this.speed * speedMultiplier;
+      } else if (deltaX < -(this.speed * speedMultiplier + 0.1)) {
+        this.x -= this.speed * speedMultiplier;
       } else {
         this.x = action.x;
         this.actionTime = 1;
@@ -170,7 +171,7 @@ class Avatar {
               { type: "hugged", mirrored: !this.sprite.mirrored },
             ])
           );
-          this.showIcon();
+          this.showIcon({ x: (this.x + action.who.x) / 2 });
         } else {
           this.actionTime = 25;
           this.currentBehaviour.insert(this.behaviourLoopIndex, {
@@ -251,7 +252,7 @@ class Avatar {
     this.world.renderedBubbles.push(
       createAdvancedBubble({
         type: "icon",
-        x: (this.x + whoToHug.x) / 2,
+        x: config.x,
         y: this.y - 20,
         spriteInfo: iconSprite,
       })
