@@ -114,13 +114,14 @@ class World {
     if (commands) {
       for (const { command, args, argUsers } of commands) {
         if (command == "hug") {
-          const toHug = argUsers
-            ? argUsers
-            : [
-                Object.keys(this.userAvatars)
-                  .filter((name) => name != user.name)
-                  .random(),
-              ];
+          const toHug =
+            argUsers.length > 0
+              ? argUsers
+              : [
+                  Object.keys(this.userAvatars)
+                    .filter((name) => name != user.name)
+                    .random(),
+                ];
           const userAvatar = this.userAvatars[user.name];
           let behaviours = [];
           for (const name of toHug) {
