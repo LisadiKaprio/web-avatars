@@ -142,23 +142,7 @@ client.on("message", (channel, tags, message, self) => {
       activeUsers.push(username);
     }
 
-    if (tags.emotes) {
-      for (const [emote, charPositions] of Object.entries(tags.emotes)) {
-        for (let i = 0; i < charPositions.length; i++) {
-          newEmotes.push({
-            name: username,
-            id: emote,
-          });
-        }
-      }
-      // for each emote in message
-      // emote[1] = { who: kirinokirino, id: 65}
-      // emote[2] = { who: kirinokirino, id: 65}
-      // emote[3] = { who: kirinokirino, id: 46636}
-    }
-
     const detectedCommand = message.match(/^!([\w]+)($|\s.*)/);
-
     if (detectedCommand) {
       const command = detectedCommand[1];
       const args = detectedCommand[2].split(/\s+/);
@@ -218,23 +202,35 @@ client.on("message", (channel, tags, message, self) => {
           });
         }
       }
-
-      if (!tags.emotes && !detectedCommand) {
+    } else {
+      // no command detected
+      // counts messages written by the user and gives xp
+      users[username].messageCount += 1;
+      users[username].xp += 15;
+      if (!tags.emotes) {
         // NOT A COMMAND
         if (newMessages[username]) {
           newMessages[username].push(message);
         } else {
           newMessages[username] = [message];
         }
-      } else if (!detectedCommand) {
-        // counts messages written by the user and gives xp
-        users[username].messageCount += 1;
-        users[username].xp += 15;
+      } else {
+        for (const [emote, charPositions] of Object.entries(tags.emotes)) {
+          for (let i = 0; i < charPositions.length; i++) {
+            newEmotes.push({
+              name: username,
+              id: emote,
+            });
+          }
+        }
+        // for each emote in message
+        // emote[1] = { who: kirinokirino, id: 65}
+        // emote[2] = { who: kirinokirino, id: 65}
+        // emote[3] = { who: kirinokirino, id: 46636}
       }
-
-      // save that as a json file then
-      saveUser(username);
     }
+    // save that as a json file then
+    saveUser(username);
   }
 });
 

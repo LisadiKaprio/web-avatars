@@ -36,7 +36,6 @@ class World {
     // value = {name: 'kirinokirino', messageCount: 2, ... }
     // key = kirinokirino
     // key is like 1 in array[1]
-
     for (const [name, user] of Object.entries(users)) {
       // create a new user avatar.
       if (!this.userAvatars[name]) {
@@ -58,11 +57,12 @@ class World {
       // handle user messages
       if (messages[name] || emotes.some((emote) => emote.name == name)) {
         let avatar = this.userAvatars[name];
+        avatar.changeBehaviour(BEHAVIOURS.idle);
         avatar.pushMotivation(BEHAVIOURS.talk);
         if (!avatar.isActive) {
           this.chat.push({
             text: `Welcome back ${name}!`,
-            color: users[user].color,
+            color: avatar.color,
           });
         }
         avatar.isActive = true;
@@ -83,8 +83,8 @@ class World {
 
         // log the message in chat and add a message bubble
         if (MESSAGES_ALL_OVER_THE_PLACE) {
-          for (const message of messages[user]) {
-            this.chat.push({ text: message, color: users[user].color });
+          for (const message of messages[name]) {
+            this.chat.push({ text: message, color: avatar.color });
             this.renderedBubbles.push(
               createAdvancedBubble(
                 {
@@ -165,7 +165,6 @@ class World {
         userAvatar.isActive &&
         this.time - userAvatar.lastChatTime >= INACTIVE_TIME
       ) {
-        userAvatar.changeBehaviour(BEHAVIOURS.sleep);
         userAvatar.isActive = false;
         this.chat.push({
           text: `${userAvatar.name} hasn't written much in chat for a while now... Seems like they fell asleep!`,
@@ -278,9 +277,9 @@ function createAdvancedBubble(config) {
     x: config.x,
     y: config.y - offset,
     text: config.text,
-    displaySize: config.spriteInfo.displaySize,
-    cutSize: config.spriteInfo.cutSize,
-    src: config.spriteInfo.src,
+    displaySize: config.spriteInfo ? config.spriteInfo.displaySize : undefined,
+    cutSize: config.spriteInfo ? config.spriteInfo.cutSize : undefined,
+    src: config.spriteInfo ? config.spriteInfo.src : undefined,
     behaviourLoop: config.behaviourLoop,
   });
   return bubble;
