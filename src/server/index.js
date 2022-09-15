@@ -153,9 +153,7 @@ client.on("message", (channel, tags, message, self) => {
         })
         .filter((user) => user != undefined);
 
-      //changed to false >:( KIRINO
-      let handled = false;
-
+      let handled = true;
       if (tags.mod || tags.badges?.broadcaster) {
         // MOD/BROADCASTER COMMANDS
         if (command === COMMANDS.clearUsers) {
