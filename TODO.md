@@ -1,27 +1,13 @@
 ## misc
 
-[] *important!* log window: "Welcome back %username!" after the user has texted again after falling asleep
 
 # user-to-user interactions
-
-## hug 
 
 [] deduct 30 xp points when hugging
 
 [] log window: "%username spends 30 xp to hug %username!"
 
-[] after hugging, avatars should walk off in separate directions (not in the same one)
-
-[] *important!* avatar should walk around 2 times faster when going for a hug
-
-## bonk
-
-[] *important!* !bonk %username
-
-  -> [] user who typed it floats over to the user he/she wants to bonk, then they both perform a bonk animation , then they continue on with their routine
-
-  -> [] deduct 60 xp points when bonking
-
+-> [] deduct 60 xp points when bonking
 
 # labors
 
@@ -147,3 +133,13 @@
 [x] fix bug?
 
 -> [x] be able to mirror the sprites i drew through script
+
+[x] *important!* log window: "Welcome back %username!" after the user has texted again after falling asleep
+
+[x] *important!* !bonk %username
+
+  -> [x] user who typed it floats over to the user he/she wants to bonk, then they both perform a bonk animation , then they continue on with their routine
+
+[-] after hugging, avatars should walk off in separate directions (not in the same one)
+
+[x] *important!* avatar should walk around 2 times faster when going for a hug
