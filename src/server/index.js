@@ -184,9 +184,25 @@ client.on("message", (channel, tags, message, self) => {
 
       // not handled command
       if (!handled) {
+        // pay the price for the command;
+        let payed = false;
+        if (command == "bonk") {
+          if (users[username].xp >= 60) {
+            users[username].xp -= 60;
+            payed = true;
+          }
+        } else if (command == "hug") {
+          if (users[username].xp >= 30) {
+            users[username].xp -= 30;
+            payed = true;
+          }
+        } else {
+          // pass through the unknown commands
+          payed = true;
+        }
         // Pass all the unknown commands (starting with ! ) to the frontend
         // in hopes that it knows what to do with them.
-        if (!users[username].unhandledCommands) {
+        if (!users[username].unhandledCommands && payed) {
           users[username].unhandledCommands = [
             {
               command: command,
@@ -194,7 +210,7 @@ client.on("message", (channel, tags, message, self) => {
               argUsers: argUsers,
             },
           ];
-        } else {
+        } else if (payed) {
           users[username].unhandledCommands.push({
             command: command,
             args: args,

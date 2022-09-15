@@ -231,6 +231,12 @@ class World {
       if (name == origin.name) continue;
       const target = this.userAvatars[name];
       if (target) {
+        this.chat.push({
+          text: `${origin.displayName} uses ${actionPrice(
+            action
+          )}xp to ${action} ${target.displayName}`,
+          color: origin.color,
+        });
         behaviours.push(new Behaviour(action, [{ type: action, who: target }]));
       }
     }

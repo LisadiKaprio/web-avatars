@@ -275,6 +275,15 @@ const ACTIONS = {
   bonked: "bonked",
 };
 
+function actionPrice(action) {
+  if (action == ACTIONS.hug) {
+    return 30;
+  }
+  if (action == ACTIONS.bonk) {
+    return 60;
+  }
+}
+
 class Behaviour {
   constructor(name, actions) {
     this.name = name;
