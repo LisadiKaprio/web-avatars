@@ -1,5 +1,6 @@
 ## misc
 
+[] handle changing user color (preferably change color of the avatarright away)
 
 # user-to-user interactions
 
