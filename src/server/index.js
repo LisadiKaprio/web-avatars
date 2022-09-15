@@ -180,6 +180,8 @@ client.on("message", (channel, tags, message, self) => {
         } else {
           handled = false;
         }
+      } else {
+        handled = false;
       }
 
       // not handled command
