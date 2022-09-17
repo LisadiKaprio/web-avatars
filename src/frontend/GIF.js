@@ -1,5 +1,5 @@
 // code i got from stackoverflow, to display gif-emotes
-//
+// https://stackoverflow.com/a/48348567
 
 /*============================================================================
   Gif Decoder and player for use with Canvas API's

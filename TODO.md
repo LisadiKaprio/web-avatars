@@ -2,9 +2,21 @@
 
 [] handle changing user color (preferably change color of the avatarright away)
 
-[] bug: interrupted by talking animation while walking to bonk (LisadiKaprio)
+[] *important!* bug: interrupted by talking animation while walking to bonk (LisadiKaprio)
 
 [] bug: hugged a person twice (nc_para_) (situation: !hug bacing, !hug lisadikaprio; what happened: hugged bacing, then hugged lisa, then hugged bacing again, then talking animation happened)
+
+[] emojis flying around like emotes:
+
+-> Moscowwbish: you should be able to use a regex to extract emojis out of text and render them onto the canvas as text
+
+-> Moscowwbish: the default font should support emojis
+
+[] *important!* bug: not all animated emotes displaying (lisadiAchanchanchanteachan displaying, anim emotes from edu's / anomon's channels aren't displaying)
+
+-> caching issue? (why is achan emote displaying hmmm)
+
+-> compression issue?
 
 # random idea: character traits
 
