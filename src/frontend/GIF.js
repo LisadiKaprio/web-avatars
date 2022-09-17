@@ -1,597 +1,433 @@
-// code i got from stackoverflow, to display gif-emotes
-// https://stackoverflow.com/a/48348567
+// (c) Dean McNamee <dean@gmail.com>, 2013.
+//
+// https://github.com/deanm/omggif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+// sell copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+// IN THE SOFTWARE.
+//
+// omggif is a JavaScript implementation of a GIF 89a encoder and decoder,
+// including animation and compression.  It does not rely on any specific
+// underlying system, so should run in the browser, Node, or Plask.
 
-/*============================================================================
-  Gif Decoder and player for use with Canvas API's
+"use strict";
 
-**NOT** for commercial use.
+function GifReader(buf) {
+  var p = 0;
 
-To use
+  // - Header (GIF87a or GIF89a).
+  if (
+    buf[p++] !== 0x47 ||
+    buf[p++] !== 0x49 ||
+    buf[p++] !== 0x46 ||
+    buf[p++] !== 0x38 ||
+    ((buf[p++] + 1) & 0xfd) !== 0x38 ||
+    buf[p++] !== 0x61
+  ) {
+    throw new Error("Invalid GIF 87a/89a header.");
+  }
 
-    var myGif = GIF();                  // creates a new gif  
-    var myGif = new GIF();              // will work as well but not needed as GIF() returns the correct reference already.    
-    myGif.load("myGif.gif");            // set URL and load
-    myGif.onload = function(event){     // fires when loading is complete
-                                        //event.type   = "load"
-                                        //event.path   array containing a reference to the gif
+  // - Logical Screen Descriptor.
+  var width = buf[p++] | (buf[p++] << 8);
+  var height = buf[p++] | (buf[p++] << 8);
+  var pf0 = buf[p++]; // <Packed Fields>.
+  var global_palette_flag = pf0 >> 7;
+  var num_global_colors_pow2 = pf0 & 0x7;
+  var num_global_colors = 1 << (num_global_colors_pow2 + 1);
+  var background = buf[p++];
+  buf[p++]; // Pixel aspect ratio (unused?).
+
+  var global_palette_offset = null;
+  var global_palette_size = null;
+
+  if (global_palette_flag) {
+    global_palette_offset = p;
+    global_palette_size = num_global_colors;
+    p += num_global_colors * 3; // Seek past palette.
+  }
+
+  var no_eof = true;
+
+  var frames = [];
+
+  var delay = 0;
+  var transparent_index = null;
+  var disposal = 0; // 0 - No disposal specified.
+  var loop_count = null;
+
+  this.width = width;
+  this.height = height;
+
+  while (no_eof && p < buf.length) {
+    switch (buf[p++]) {
+      case 0x21: // Graphics Control Extension Block
+        switch (buf[p++]) {
+          case 0xff: // Application specific block
+            // Try if it's a Netscape block (with animation loop counter).
+            if (
+              buf[p] !== 0x0b || // 21 FF already read, check block size.
+              // NETSCAPE2.0
+              (buf[p + 1] == 0x4e &&
+                buf[p + 2] == 0x45 &&
+                buf[p + 3] == 0x54 &&
+                buf[p + 4] == 0x53 &&
+                buf[p + 5] == 0x43 &&
+                buf[p + 6] == 0x41 &&
+                buf[p + 7] == 0x50 &&
+                buf[p + 8] == 0x45 &&
+                buf[p + 9] == 0x32 &&
+                buf[p + 10] == 0x2e &&
+                buf[p + 11] == 0x30 &&
+                // Sub-block
+                buf[p + 12] == 0x03 &&
+                buf[p + 13] == 0x01 &&
+                buf[p + 16] == 0)
+            ) {
+              p += 14;
+              loop_count = buf[p++] | (buf[p++] << 8);
+              p++; // Skip terminator.
+            } else {
+              // We don't know what it is, just try to get past it.
+              p += 12;
+              while (true) {
+                // Seek through subblocks.
+                var block_size = buf[p++];
+                // Bad block size (ex: undefined from an out of bounds read).
+                if (!(block_size >= 0)) throw Error("Invalid block size");
+                if (block_size === 0) break; // 0 size is terminator
+                p += block_size;
+              }
+            }
+            break;
+
+          case 0xf9: // Graphics Control Extension
+            if (buf[p++] !== 0x4 || buf[p + 4] !== 0)
+              throw new Error("Invalid graphics extension block.");
+            var pf1 = buf[p++];
+            delay = buf[p++] | (buf[p++] << 8);
+            transparent_index = buf[p++];
+            if ((pf1 & 1) === 0) transparent_index = null;
+            disposal = (pf1 >> 2) & 0x7;
+            p++; // Skip terminator.
+            break;
+
+          // Plain Text Extension could be present and we just want to be able
+          // to parse past it.  It follows the block structure of the comment
+          // extension enough to reuse the path to skip through the blocks.
+          case 0x01: // Plain Text Extension (fallthrough to Comment Extension)
+          case 0xfe: // Comment Extension.
+            while (true) {
+              // Seek through subblocks.
+              var block_size = buf[p++];
+              // Bad block size (ex: undefined from an out of bounds read).
+              if (!(block_size >= 0)) throw Error("Invalid block size");
+              if (block_size === 0) break; // 0 size is terminator
+              // console.log(buf.slice(p, p+block_size).toString('ascii'));
+              p += block_size;
+            }
+            break;
+
+          default:
+            throw new Error("Unknown graphic control label: 0x" + buf[p - 1].toString(16));
+        }
+        break;
+
+      case 0x2c: // Image Descriptor.
+        var x = buf[p++] | (buf[p++] << 8);
+        var y = buf[p++] | (buf[p++] << 8);
+        var w = buf[p++] | (buf[p++] << 8);
+        var h = buf[p++] | (buf[p++] << 8);
+        var pf2 = buf[p++];
+        var local_palette_flag = pf2 >> 7;
+        var interlace_flag = (pf2 >> 6) & 1;
+        var num_local_colors_pow2 = pf2 & 0x7;
+        var num_local_colors = 1 << (num_local_colors_pow2 + 1);
+        var palette_offset = global_palette_offset;
+        var palette_size = global_palette_size;
+        var has_local_palette = false;
+        if (local_palette_flag) {
+          var has_local_palette = true;
+          palette_offset = p; // Override with local palette.
+          palette_size = num_local_colors;
+          p += num_local_colors * 3; // Seek past palette.
+        }
+
+        var data_offset = p;
+
+        p++; // codesize
+        while (true) {
+          var block_size = buf[p++];
+          // Bad block size (ex: undefined from an out of bounds read).
+          if (!(block_size >= 0)) throw Error("Invalid block size");
+          if (block_size === 0) break; // 0 size is terminator
+          p += block_size;
+        }
+
+        frames.push({
+          x: x,
+          y: y,
+          width: w,
+          height: h,
+          has_local_palette: has_local_palette,
+          palette_offset: palette_offset,
+          palette_size: palette_size,
+          data_offset: data_offset,
+          data_length: p - data_offset,
+          transparent_index: transparent_index,
+          interlaced: !!interlace_flag,
+          delay: delay,
+          disposal: disposal,
+        });
+        break;
+
+      case 0x3b: // Trailer Marker (end of file).
+        no_eof = false;
+        break;
+
+      default:
+        throw new Error("Unknown gif block: 0x" + buf[p - 1].toString(16));
+        break;
     }
-    myGif.onprogress = function(event){ // Note this function is not bound to myGif
-                                        //event.bytesRead    bytes decoded
-                                        //event.totalBytes   total bytes
-                                        //event.frame        index of last frame decoded
-    }
-    myGif.onerror = function(event){    // fires if there is a problem loading. this = myGif
-                                        //event.type   a description of the error
-                                        //event.path   array containing a reference to the gif
-    }
+  }
 
-Once loaded the gif can be displayed
-    if(!myGif.loading){
-        ctx.drawImage(myGif.image,0,0); 
-    }
-You can display the last frame loaded during loading
-
-    if(myGif.lastFrame !== null){
-        ctx.drawImage(myGif.lastFrame.image,0,0); 
-    }
-
-
-To access all the frames
-    var gifFrames = myGif.frames; // an array of frames.
-
-A frame holds various frame associated items.
-    myGif.frame[0].image; // the first frames image
-    myGif.frame[0].delay; // time in milliseconds frame is displayed for
-
-
-
-
-Gifs use various methods to reduce the file size. The loaded frames do not maintain the optimisations and hold the full resolution frames as DOM images. This mean the memory footprint of a decode gif will be many time larger than the Gif file.
- */
-const GIF = function () {
-  // **NOT** for commercial use.
-  var timerID; // timer handle for set time out usage
-  var st; // holds the stream object when loading.
-  var interlaceOffsets = [0, 4, 2, 1]; // used in de-interlacing.
-  var interlaceSteps = [8, 8, 4, 2];
-  var interlacedBufSize; // this holds a buffer to de interlace. Created on the first frame and when size changed
-  var deinterlaceBuf;
-  var pixelBufSize; // this holds a buffer for pixels. Created on the first frame and when size changed
-  var pixelBuf;
-  const GIF_FILE = {
-    // gif file data headers
-    GCExt: 0xf9,
-    COMMENT: 0xfe,
-    APPExt: 0xff,
-    UNKNOWN: 0x01, // not sure what this is but need to skip it in parser
-    IMAGE: 0x2c,
-    EOF: 59, // This is entered as decimal
-    EXT: 0x21,
+  this.numFrames = function () {
+    return frames.length;
   };
-  // simple buffered stream used to read from the file
-  var Stream = function (data) {
-    this.data = new Uint8ClampedArray(data);
 
-    // throw an error if the image doesnt have the gif header, so that
-    // the outside code can react to it
-    // https://www.file-recovery.com/gif-signature-format.htm
-    // gif header: 0x47494638
-    if (
-      this.data[0] !== 0x47 ||
-      this.data[1] !== 0x49 ||
-      this.data[2] !== 0x46 ||
-      this.data[3] !== 0x38
-    ) {
-      // not a gif
-      error("not a gif");
-    }
-    this.pos = 0;
-    var len = this.data.length;
-    this.getString = function (count) {
-      // returns a string from current pos of len count
-      var s = "";
-      while (count--) {
-        s += String.fromCharCode(this.data[this.pos++]);
-      }
-      return s;
-    };
-    this.readSubBlocks = function () {
-      // reads a set of blocks as a string
-      var size,
-        count,
-        data = "";
-      do {
-        count = size = this.data[this.pos++];
-        while (count--) {
-          data += String.fromCharCode(this.data[this.pos++]);
-        }
-      } while (size !== 0 && this.pos < len);
-      return data;
-    };
-    this.readSubBlocksB = function () {
-      // reads a set of blocks as binary
-      var size,
-        count,
-        data = [];
-      do {
-        count = size = this.data[this.pos++];
-        while (count--) {
-          data.push(this.data[this.pos++]);
-        }
-      } while (size !== 0 && this.pos < len);
-      return data;
-    };
+  this.loopCount = function () {
+    return loop_count;
   };
-  // LZW decoder uncompressed each frames pixels
-  // this needs to be optimised.
-  // minSize is the min dictionary as powers of two
-  // size and data is the compressed pixels
-  function lzwDecode(minSize, data) {
-    var i, pixelPos, pos, clear, eod, size, done, dic, code, last, d, len;
-    pos = pixelPos = 0;
-    dic = [];
-    clear = 1 << minSize;
-    eod = clear + 1;
-    size = minSize + 1;
-    done = false;
-    while (!done) {
-      // JavaScript optimisers like a clear exit though I never use 'done' apart from fooling the optimiser
-      last = code;
-      code = 0;
-      for (i = 0; i < size; i++) {
-        if (data[pos >> 3] & (1 << (pos & 7))) {
-          code |= 1 << i;
+
+  this.frameInfo = function (frame_num) {
+    if (frame_num < 0 || frame_num >= frames.length) throw new Error("Frame index out of range.");
+    return frames[frame_num];
+  };
+
+  // I will go to copy and paste hell one day...
+  this.decodeAndBlitFrameRGBA = function (frame_num, pixels) {
+    var frame = this.frameInfo(frame_num);
+    var num_pixels = frame.width * frame.height;
+    var index_stream = new Uint8Array(num_pixels); // At most 8-bit indices.
+    GifReaderLZWOutputIndexStream(buf, frame.data_offset, index_stream, num_pixels);
+    var palette_offset = frame.palette_offset;
+
+    // NOTE(deanm): It seems to be much faster to compare index to 256 than
+    // to === null.  Not sure why, but CompareStub_EQ_STRICT shows up high in
+    // the profile, not sure if it's related to using a Uint8Array.
+    var trans = frame.transparent_index;
+    if (trans === null) trans = 256;
+
+    // We are possibly just blitting to a portion of the entire frame.
+    // That is a subrect within the framerect, so the additional pixels
+    // must be skipped over after we finished a scanline.
+    var framewidth = frame.width;
+    var framestride = width - framewidth;
+    var xleft = framewidth; // Number of subrect pixels left in scanline.
+
+    // Output index of the top left corner of the subrect.
+    var opbeg = (frame.y * width + frame.x) * 4;
+    // Output index of what would be the left edge of the subrect, one row
+    // below it, i.e. the index at which an interlace pass should wrap.
+    var opend = ((frame.y + frame.height) * width + frame.x) * 4;
+    var op = opbeg;
+
+    var scanstride = framestride * 4;
+
+    // Use scanstride to skip past the rows when interlacing.  This is skipping
+    // 7 rows for the first two passes, then 3 then 1.
+    if (frame.interlaced === true) {
+      scanstride += width * 4 * 7; // Pass 1.
+    }
+
+    var interlaceskip = 8; // Tracking the row interval in the current pass.
+
+    for (var i = 0, il = index_stream.length; i < il; ++i) {
+      var index = index_stream[i];
+
+      if (xleft === 0) {
+        // Beginning of new scan line
+        op += scanstride;
+        xleft = framewidth;
+        if (op >= opend) {
+          // Catch the wrap to switch passes when interlacing.
+          scanstride = framestride * 4 + width * 4 * (interlaceskip - 1);
+          // interlaceskip / 2 * 4 is interlaceskip << 1.
+          op = opbeg + (framewidth + framestride) * (interlaceskip << 1);
+          interlaceskip >>= 1;
         }
-        pos++;
       }
-      if (code === clear) {
-        // clear and reset the dictionary
-        dic = [];
-        size = minSize + 1;
-        for (i = 0; i < clear; i++) {
-          dic[i] = [i];
-        }
-        dic[clear] = [];
-        dic[eod] = null;
+
+      if (index === trans) {
+        op += 4;
       } else {
-        if (code === eod) {
-          done = true;
-          return;
-        }
-        if (code >= dic.length) {
-          dic.push(dic[last].concat(dic[last][0]));
-        } else if (last !== clear) {
-          dic.push(dic[last].concat(dic[code][0]));
-        }
-        d = dic[code];
-        len = d.length;
-        for (i = 0; i < len; i++) {
-          pixelBuf[pixelPos++] = d[i];
-        }
-        if (dic.length === 1 << size && size < 12) {
-          size++;
-        }
+        var r = buf[palette_offset + index * 3];
+        var g = buf[palette_offset + index * 3 + 1];
+        var b = buf[palette_offset + index * 3 + 2];
+        pixels[op++] = r;
+        pixels[op++] = g;
+        pixels[op++] = b;
+        pixels[op++] = 255;
       }
+      --xleft;
     }
-  }
-  function parseColourTable(count) {
-    // get a colour table of length count  Each entry is 3 bytes, for RGB.
-    var colours = [];
-    for (var i = 0; i < count; i++) {
-      colours.push([st.data[st.pos++], st.data[st.pos++], st.data[st.pos++]]);
-    }
-    return colours;
-  }
-  function parse() {
-    // read the header. This is the starting point of the decode and async calls parseBlock
-    var bitField;
-    st.pos += 6;
-    gif.width = st.data[st.pos++] + (st.data[st.pos++] << 8);
-    gif.height = st.data[st.pos++] + (st.data[st.pos++] << 8);
-    bitField = st.data[st.pos++];
-    gif.colorRes = (bitField & 0b1110000) >> 4;
-    gif.globalColourCount = 1 << ((bitField & 0b111) + 1);
-    gif.bgColourIndex = st.data[st.pos++];
-    st.pos++; // ignoring pixel aspect ratio. if not 0, aspectRatio = (pixelAspectRatio + 15) / 64
-    if (bitField & 0b10000000) {
-      gif.globalColourTable = parseColourTable(gif.globalColourCount);
-    } // global colour flag
-    setTimeout(parseBlock, 0);
-  }
-  function parseAppExt() {
-    // get application specific data. Netscape added iterations and terminator. Ignoring that
-    st.pos += 1;
-    if ("NETSCAPE" === st.getString(8)) {
-      st.pos += 8;
-    } // ignoring this data. iterations (word) and terminator (byte)
-    else {
-      st.pos += 3; // 3 bytes of string usually "2.0" when identifier is NETSCAPE
-      st.readSubBlocks(); // unknown app extension
-    }
-  }
-  function parseGCExt() {
-    // get GC data
-    var bitField;
-    st.pos++;
-    bitField = st.data[st.pos++];
-    gif.disposalMethod = (bitField & 0b11100) >> 2;
-    gif.transparencyGiven = bitField & 0b1 ? true : false; // ignoring bit two that is marked as  userInput???
-    gif.delayTime = st.data[st.pos++] + (st.data[st.pos++] << 8);
-    gif.transparencyIndex = st.data[st.pos++];
-    st.pos++;
-  }
-  function parseImg() {
-    // decodes image data to create the indexed pixel image
-    var deinterlace, frame, bitField;
-    deinterlace = function (width) {
-      // de interlace pixel data if needed
-      var lines, fromLine, pass, toline;
-      lines = pixelBufSize / width;
-      fromLine = 0;
-      if (interlacedBufSize !== pixelBufSize) {
-        // create the buffer if size changed or undefined.
-        deinterlaceBuf = new Uint8Array(pixelBufSize);
-        interlacedBufSize = pixelBufSize;
-      }
-      for (pass = 0; pass < 4; pass++) {
-        for (
-          toLine = interlaceOffsets[pass];
-          toLine < lines;
-          toLine += interlaceSteps[pass]
-        ) {
-          deinterlaceBuf.set(
-            pixelBuf.subarray(fromLine, fromLine + width),
-            toLine * width
-          );
-          fromLine += width;
-        }
-      }
-    };
-    frame = {};
-    gif.frames.push(frame);
-    frame.disposalMethod = gif.disposalMethod;
-    frame.time = gif.length;
-    frame.delay = gif.delayTime * 10;
-    gif.length += frame.delay;
-    if (gif.transparencyGiven) {
-      frame.transparencyIndex = gif.transparencyIndex;
-    } else {
-      frame.transparencyIndex = undefined;
-    }
-    frame.leftPos = st.data[st.pos++] + (st.data[st.pos++] << 8);
-    frame.topPos = st.data[st.pos++] + (st.data[st.pos++] << 8);
-    frame.width = st.data[st.pos++] + (st.data[st.pos++] << 8);
-    frame.height = st.data[st.pos++] + (st.data[st.pos++] << 8);
-    bitField = st.data[st.pos++];
-    frame.localColourTableFlag = bitField & 0b10000000 ? true : false;
-    if (frame.localColourTableFlag) {
-      frame.localColourTable = parseColourTable(1 << ((bitField & 0b111) + 1));
-    }
-    if (pixelBufSize !== frame.width * frame.height) {
-      // create a pixel buffer if not yet created or if current frame size is different from previous
-      pixelBuf = new Uint8Array(frame.width * frame.height);
-      pixelBufSize = frame.width * frame.height;
-    }
-    lzwDecode(st.data[st.pos++], st.readSubBlocksB()); // decode the pixels
-    if (bitField & 0b1000000) {
-      // de interlace if needed
-      frame.interlaced = true;
-      deinterlace(frame.width);
-    } else {
-      frame.interlaced = false;
-    }
-    processFrame(frame); // convert to canvas image
-  }
-  function processFrame(frame) {
-    // creates a RGBA canvas image from the indexed pixel data.
-    var ct, cData, dat, pixCount, ind, useT, i, pixel, pDat, col, frame, ti;
-    frame.image = document.createElement("canvas");
-    frame.image.width = gif.width;
-    frame.image.height = gif.height;
-    frame.image.ctx = frame.image.getContext("2d");
-    ct = frame.localColourTableFlag
-      ? frame.localColourTable
-      : gif.globalColourTable;
-    if (gif.lastFrame === null) {
-      gif.lastFrame = frame;
-    }
-    useT =
-      gif.lastFrame.disposalMethod === 2 || gif.lastFrame.disposalMethod === 3
-        ? true
-        : false;
-    if (!useT) {
-      frame.image.ctx.drawImage(
-        gif.lastFrame.image,
-        0,
-        0,
-        gif.width,
-        gif.height
-      );
-    }
-    cData = frame.image.ctx.getImageData(
-      frame.leftPos,
-      frame.topPos,
-      frame.width,
-      frame.height
-    );
-    ti = frame.transparencyIndex;
-    dat = cData.data;
-    if (frame.interlaced) {
-      pDat = deinterlaceBuf;
-    } else {
-      pDat = pixelBuf;
-    }
-    pixCount = pDat.length;
-    ind = 0;
-    for (i = 0; i < pixCount; i++) {
-      pixel = pDat[i];
-      col = ct[pixel];
-      if (ti !== pixel) {
-        dat[ind++] = col[0];
-        dat[ind++] = col[1];
-        dat[ind++] = col[2];
-        dat[ind++] = 255; // Opaque.
-      } else if (useT) {
-        dat[ind + 3] = 0; // Transparent.
-        ind += 4;
+  };
+}
+
+function GifReaderLZWOutputIndexStream(code_stream, p, output, output_length) {
+  var min_code_size = code_stream[p++];
+
+  var clear_code = 1 << min_code_size;
+  var eoi_code = clear_code + 1;
+  var next_code = eoi_code + 1;
+
+  var cur_code_size = min_code_size + 1; // Number of bits per code.
+  // NOTE: This shares the same name as the encoder, but has a different
+  // meaning here.  Here this masks each code coming from the code stream.
+  var code_mask = (1 << cur_code_size) - 1;
+  var cur_shift = 0;
+  var cur = 0;
+
+  var op = 0; // Output pointer.
+
+  var subblock_size = code_stream[p++];
+
+  // TODO(deanm): Would using a TypedArray be any faster?  At least it would
+  // solve the fast mode / backing store uncertainty.
+  // var code_table = Array(4096);
+  var code_table = new Int32Array(4096); // Can be signed, we only use 20 bits.
+
+  var prev_code = null; // Track code-1.
+
+  while (true) {
+    // Read up to two bytes, making sure we always 12-bits for max sized code.
+    while (cur_shift < 16) {
+      if (subblock_size === 0) break; // No more data to be read.
+
+      cur |= code_stream[p++] << cur_shift;
+      cur_shift += 8;
+
+      if (subblock_size === 1) {
+        // Never let it get to 0 to hold logic above.
+        subblock_size = code_stream[p++]; // Next subblock.
       } else {
-        ind += 4;
+        --subblock_size;
       }
     }
-    frame.image.ctx.putImageData(cData, frame.leftPos, frame.topPos);
-    gif.lastFrame = frame;
-    if (!gif.waitTillDone && typeof gif.onload === "function") {
-      doOnloadEvent();
-    } // if !waitTillDone the call onload now after first frame is loaded
-  }
-  // **NOT** for commercial use.
-  function finnished() {
-    // called when the load has completed
-    gif.loading = false;
-    gif.frameCount = gif.frames.length;
-    gif.lastFrame = null;
-    st = undefined;
-    gif.complete = true;
-    gif.disposalMethod = undefined;
-    gif.transparencyGiven = undefined;
-    gif.delayTime = undefined;
-    gif.transparencyIndex = undefined;
-    gif.waitTillDone = undefined;
-    pixelBuf = undefined; // dereference pixel buffer
-    deinterlaceBuf = undefined; // dereference interlace buff (may or may not be used);
-    pixelBufSize = undefined;
-    deinterlaceBuf = undefined;
-    gif.currentFrame = 0;
-    if (gif.frames.length > 0) {
-      gif.image = gif.frames[0].image;
+
+    // TODO(deanm): We should never really get here, we should have received
+    // and EOI.
+    if (cur_shift < cur_code_size) break;
+
+    var code = cur & code_mask;
+    cur >>= cur_code_size;
+    cur_shift -= cur_code_size;
+
+    // TODO(deanm): Maybe should check that the first code was a clear code,
+    // at least this is what you're supposed to do.  But actually our encoder
+    // now doesn't emit a clear code first anyway.
+    if (code === clear_code) {
+      // We don't actually have to clear the table.  This could be a good idea
+      // for greater error checking, but we don't really do any anyway.  We
+      // will just track it with next_code and overwrite old entries.
+
+      next_code = eoi_code + 1;
+      cur_code_size = min_code_size + 1;
+      code_mask = (1 << cur_code_size) - 1;
+
+      // Don't update prev_code ?
+      prev_code = null;
+      continue;
+    } else if (code === eoi_code) {
+      break;
     }
-    doOnloadEvent();
-    if (typeof gif.onloadall === "function") {
-      gif.onloadall.bind(gif)({ type: "loadall", path: [gif] });
+
+    // We have a similar situation as the decoder, where we want to store
+    // variable length entries (code table entries), but we want to do in a
+    // faster manner than an array of arrays.  The code below stores sort of a
+    // linked list within the code table, and then "chases" through it to
+    // construct the dictionary entries.  When a new entry is created, just the
+    // last byte is stored, and the rest (prefix) of the entry is only
+    // referenced by its table entry.  Then the code chases through the
+    // prefixes until it reaches a single byte code.  We have to chase twice,
+    // first to compute the length, and then to actually copy the data to the
+    // output (backwards, since we know the length).  The alternative would be
+    // storing something in an intermediate stack, but that doesn't make any
+    // more sense.  I implemented an approach where it also stored the length
+    // in the code table, although it's a bit tricky because you run out of
+    // bits (12 + 12 + 8), but I didn't measure much improvements (the table
+    // entries are generally not the long).  Even when I created benchmarks for
+    // very long table entries the complexity did not seem worth it.
+    // The code table stores the prefix entry in 12 bits and then the suffix
+    // byte in 8 bits, so each entry is 20 bits.
+
+    var chase_code = code < next_code ? code : prev_code;
+
+    // Chase what we will output, either {CODE} or {CODE-1}.
+    var chase_length = 0;
+    var chase = chase_code;
+    while (chase > clear_code) {
+      chase = code_table[chase] >> 8;
+      ++chase_length;
     }
-    if (gif.playOnLoad) {
-      gif.play();
-    }
-  }
-  function canceled() {
-    // called if the load has been cancelled
-    finnished();
-    if (typeof gif.cancelCallback === "function") {
-      gif.cancelCallback.bind(gif)({ type: "canceled", path: [gif] });
-    }
-  }
-  function parseExt() {
-    // parse extended blocks
-    const blockID = st.data[st.pos++];
-    if (blockID === GIF_FILE.GCExt) {
-      parseGCExt();
-    } else if (blockID === GIF_FILE.COMMENT) {
-      gif.comment += st.readSubBlocks();
-    } else if (blockID === GIF_FILE.APPExt) {
-      parseAppExt();
-    } else {
-      if (blockID === GIF_FILE.UNKNOWN) {
-        st.pos += 13;
-      } // skip unknow block
-      st.readSubBlocks();
-    }
-  }
-  function parseBlock() {
-    // parsing the blocks
-    if (gif.cancel !== undefined && gif.cancel === true) {
-      canceled();
+
+    var k = chase;
+
+    var op_end = op + chase_length + (chase_code !== code ? 1 : 0);
+    if (op_end > output_length) {
+      console.log("Warning, gif stream longer than expected.");
       return;
     }
 
-    const blockId = st.data[st.pos++];
-    if (blockId === GIF_FILE.IMAGE) {
-      // image block
-      parseImg();
-      if (gif.firstFrameOnly) {
-        finnished();
-        return;
-      }
-    } else if (blockId === GIF_FILE.EOF) {
-      finnished();
-      return;
-    } else {
-      parseExt();
-    }
-    if (typeof gif.onprogress === "function") {
-      gif.onprogress({
-        bytesRead: st.pos,
-        totalBytes: st.data.length,
-        frame: gif.frames.length,
-      });
-    }
-    setTimeout(parseBlock, 0); // parsing frame async so processes can get some time in.
-  }
-  function cancelLoad(callback) {
-    // cancels the loading. This will cancel the load before the next frame is decoded
-    if (gif.complete) {
-      return false;
-    }
-    gif.cancelCallback = callback;
-    gif.cancel = true;
-    return true;
-  }
-  function error(type) {
-    if (typeof gif.onerror === "function") {
-      gif.onerror.bind(this)({ type: type, path: [this] });
-    }
-    gif.onload = gif.onerror = undefined;
-    gif.loading = false;
-  }
-  function doOnloadEvent() {
-    // fire onload event if set
-    gif.currentFrame = 0;
-    gif.nextFrameAt = gif.lastFrameAt = new Date().valueOf(); // just sets the time now
-    if (typeof gif.onload === "function") {
-      gif.onload.bind(gif)({ type: "load", path: [gif] });
-    }
-    gif.onerror = gif.onload = undefined;
-  }
-  function dataLoaded(data) {
-    // Data loaded create stream and parse
-    st = new Stream(data);
-    parse();
-  }
-  function loadGif(filename) {
-    // starts the load
-    var ajax = new XMLHttpRequest();
-    ajax.responseType = "arraybuffer";
-    ajax.onload = function (e) {
-      if (e.target.status === 404) {
-        error("File not found");
-      } else if (e.target.status >= 200 && e.target.status < 300) {
-        dataLoaded(ajax.response);
-      } else {
-        error("Loading error : " + e.target.status);
-      }
-    };
-    ajax.open("GET", filename, true);
-    ajax.send();
-    ajax.onerror = function (e) {
-      error("File error");
-    };
-    this.src = filename;
-    this.loading = true;
-  }
-  function play() {
-    // starts play if paused
-    if (!gif.playing) {
-      gif.paused = false;
-      gif.playing = true;
-      playing();
-    }
-  }
-  function pause() {
-    // stops play
-    gif.paused = true;
-    gif.playing = false;
-    clearTimeout(timerID);
-  }
-  function togglePlay() {
-    if (gif.paused || !gif.playing) {
-      gif.play();
-    } else {
-      gif.pause();
-    }
-  }
-  function seekFrame(frame) {
-    // seeks to frame number.
-    clearTimeout(timerID);
-    gif.currentFrame = frame % gif.frames.length;
-    if (gif.playing) {
-      playing();
-    } else {
-      gif.image = gif.frames[gif.currentFrame].image;
-    }
-  }
-  function seek(time) {
-    // time in Seconds  // seek to frame that would be displayed at time
-    clearTimeout(timerID);
-    if (time < 0) {
-      time = 0;
-    }
-    time *= 1000; // in ms
-    time %= gif.length;
-    var frame = 0;
-    while (
-      time > gif.frames[frame].time + gif.frames[frame].delay &&
-      frame < gif.frames.length
-    ) {
-      frame += 1;
-    }
-    gif.currentFrame = frame;
-    if (gif.playing) {
-      playing();
-    } else {
-      gif.image = gif.frames[gif.currentFrame].image;
-    }
-  }
-  function playing() {
-    var delay;
-    var frame;
-    if (gif.playSpeed === 0) {
-      gif.pause();
-      return;
-    } else {
-      if (gif.playSpeed < 0) {
-        gif.currentFrame -= 1;
-        if (gif.currentFrame < 0) {
-          gif.currentFrame = gif.frames.length - 1;
-        }
-        frame = gif.currentFrame;
-        frame -= 1;
-        if (frame < 0) {
-          frame = gif.frames.length - 1;
-        }
-        delay = (-gif.frames[frame].delay * 1) / gif.playSpeed;
-      } else {
-        gif.currentFrame += 1;
-        gif.currentFrame %= gif.frames.length;
-        delay = (gif.frames[gif.currentFrame].delay * 1) / gif.playSpeed;
-      }
-      gif.image = gif.frames[gif.currentFrame].image;
-      timerID = setTimeout(playing, delay);
-    }
-  }
-  var gif = {
-    // the gif image object
-    onload: null, // fire on load. Use waitTillDone = true to have load fire at end or false to fire on first frame
-    onerror: null, // fires on error
-    onprogress: null, // fires a load progress event
-    onloadall: null, // event fires when all frames have loaded and gif is ready
-    paused: false, // true if paused
-    playing: false, // true if playing
-    waitTillDone: true, // If true onload will fire when all frames loaded, if false, onload will fire when first frame has loaded
-    loading: false, // true if still loading
-    firstFrameOnly: false, // if true only load the first frame
-    width: null, // width in pixels
-    height: null, // height in pixels
-    frames: [], // array of frames
-    comment: "", // comments if found in file. Note I remember that some gifs have comments per frame if so this will be all comment concatenated
-    length: 0, // gif length in ms (1/1000 second)
-    currentFrame: 0, // current frame.
-    frameCount: 0, // number of frames
-    playSpeed: 1, // play speed 1 normal, 2 twice 0.5 half, -1 reverse etc...
-    lastFrame: null, // temp hold last frame loaded so you can display the gif as it loads
-    image: null, // the current image at the currentFrame
-    playOnLoad: true, // if true starts playback when loaded
-    // functions
-    load: loadGif, // call this to load a file
-    cancel: cancelLoad, // call to stop loading
-    play: play, // call to start play
-    pause: pause, // call to pause
-    seek: seek, // call to seek to time
-    seekFrame: seekFrame, // call to seek to frame
-    togglePlay: togglePlay, // call to toggle play and pause state
-  };
-  return gif;
-};
+    // Already have the first byte from the chase, might as well write it fast.
+    output[op++] = k;
 
-/*=========================================================================
-End of gif reader
+    op += chase_length;
+    var b = op; // Track pointer, writing backwards.
 
-*/
+    if (chase_code !== code)
+      // The case of emitting {CODE-1} + k.
+      output[op++] = k;
+
+    chase = chase_code;
+    while (chase_length--) {
+      chase = code_table[chase];
+      output[--b] = chase & 0xff; // Write backwards.
+      chase >>= 8; // Pull down to the prefix code.
+    }
+
+    if (prev_code !== null && next_code < 4096) {
+      code_table[next_code++] = (prev_code << 8) | k;
+      // TODO(deanm): Figure out this clearing vs code growth logic better.  I
+      // have an feeling that it should just happen somewhere else, for now it
+      // is awkward between when we grow past the max and then hit a clear code.
+      // For now just check if we hit the max 12-bits (then a clear code should
+      // follow, also of course encoded in 12-bits).
+      if (next_code >= code_mask + 1 && cur_code_size < 12) {
+        ++cur_code_size;
+        code_mask = (code_mask << 1) | 1;
+      }
+    }
+
+    prev_code = code;
+  }
+
+  if (op !== output_length) {
+    console.log("Warning, gif stream shorter than expected.");
+  }
+
+  return output;
+}
