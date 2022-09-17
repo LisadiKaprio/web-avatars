@@ -22,6 +22,27 @@ class ImageUtil {
     });
   }
 
+  async _loadGif(src) {
+    const data = await fetch(src)
+      .then((r) => r.arrayBuffer())
+      .then((img) => new Uint8Array(img));
+    console.log(data);
+    const reader = new GifReader(data);
+    const pixels = new Uint8ClampedArray(reader.width * reader.height);
+    reader.decodeAndBlitFrameRGBA(0, pixels);
+    const finalImage = createImageBitmap(new ImageData(pixels, reader.width, reader.height));
+    return { image: () => finalImage };
+
+    // NOTE: you can extract all frames like so, in case you want to ever actually animate the emotes
+    // const frames = [];
+    // for (let i = 0, len = reader.numFrames(); i < len; ++i) {
+    //   const pixels = new Uint8ClampedArray(reader.width * reader.height);
+    //   reader.decodeAndBlitFrameRGBA(i, pixels);
+    //   const { delay } = reader.frameInfo(i);
+    //   frames.push({ delay, pixels })
+    // }
+  }
+
   // the new canvas will be as big as the image itself
   _createCanvas(width, height) {
     const c = document.createElement("canvas");
@@ -61,41 +82,14 @@ class ImageUtil {
   }
 
   async asDrawable(imageRaw) {
-    // GIF support (only if GIF class/function exists and imageRaw is a url)
-    if (typeof GIF !== "undefined" && typeof imageRaw === "string") {
-      return new Promise((resolve) => {
-        const gif = GIF(); // creates a new gif
-        gif.onerror = async () => {
-          // the image was not loadable as a gif, so try it as normal image
-          const finalImage = await this._loadImage(imageRaw);
-          resolve({ image: () => finalImage });
-        };
-
-        // when the image was a gif and loaded correctly:
-        gif.onload = () => {
-          resolve({
-            image: () => {
-              // and it's done loading completely
-              if (!gif.loading) {
-                // draw that next frame
-                return gif.image;
-              }
-              // if it is not loaded completely, but there is a last
-              // frame (= partly loaded)
-              if (gif.lastFrame !== null) {
-                // then draw that last frame again
-                return gif.lastFrame.image;
-              }
-              // otherwise nothing can be drawn
-              return null;
-            },
-          });
-        };
-        gif.load(imageRaw);
-      });
+    try {
+      // attempt loading the image as gif
+      // NOTE: this is a hack, and you should instead infer the image type from the request headers
+      return await _loadGif(imageRaw);
+    } catch (_) {
+      // otherwise load it as static
+      const finalImage = await this._loadImage(imageRaw);
+      return { image: () => finalImage };
     }
-
-    const finalImage = await this._loadImage(imageRaw);
-    return { image: () => finalImage };
   }
 }
