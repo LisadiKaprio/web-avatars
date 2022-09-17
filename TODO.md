@@ -2,6 +2,16 @@
 
 [] handle changing user color (preferably change color of the avatarright away)
 
+[] bug: interrupted by talking animation while walking to bonk (LisadiKaprio)
+
+[] bug: hugged a person twice (nc_para_) (situation: !hug bacing, !hug lisadikaprio; what happened: hugged bacing, then hugged lisa, then hugged bacing again, then talking animation happened)
+
+# random idea: character traits
+
+-> specific people aquire specific (long-lasting?) traits over the course of the game?
+
+-> example: lonely - gets hugged twice as often / randomly by others
+
 # user-to-user interactions
 
 [] deduct 30 xp points when hugging
