@@ -1,16 +1,7 @@
-## misc
 
-[] handle changing user color (preferably change color of the avatarright away)
-
-[] *important!* bug: interrupted by talking animation while walking to bonk (LisadiKaprio)
+## bugs
 
 [] bug: hugged a person twice (nc_para_) (situation: !hug bacing, !hug lisadikaprio; what happened: hugged bacing, then hugged lisa, then hugged bacing again, then talking animation happened)
-
-[] emojis flying around like emotes:
-
--> Moscowwbish: you should be able to use a regex to extract emojis out of text and render them onto the canvas as text
-
--> Moscowwbish: the default font should support emojis
 
 [] *important!* bug: not all animated emotes displaying (lisadiAchanchanchanteachan displaying, anim emotes from edu's / anomon's channels aren't displaying)
 
@@ -18,27 +9,45 @@
 
 -> compression issue?
 
-# random idea: character traits
+## misc
 
--> specific people aquire specific (long-lasting?) traits over the course of the game?
+[] handle changing user color (preferably change color of the avatarright away)
 
--> example: lonely - gets hugged twice as often / randomly by others
+[] *important!* bug: interrupted by talking animation while walking to bonk (LisadiKaprio)
+
+[] *important!* <3 emojis flying around like emotes:
+
+-> para already coded something like that for emote wall, copy from him
+
+-> Moscowwbish: you should be able to use a regex to extract emojis out of text and render them onto the canvas as text
+
+-> Moscowwbish: the default font should support emojis
+
+# log window
+
+[] *important!* every message in its own container, looks same as on this one screenshot from edu's stream i've sent before
+
+-> limited width!
+
+-> nice colors, can copy from screenshot
+
+-> located on the left bottom corner, can cut away the avatar walking area by like 500 px for that
+
+[] show how many xp points a person has when they arrive in chat: "Welcome blablabla, you currently have n xp! Use it wisely."
 
 # user-to-user interactions
 
-[] deduct 30 xp points when hugging
+[] *important!* actually forbid person to use !hug/!bonk commands if not enough xp points
 
-[] log window: "%username spends 30 xp to hug %username!"
+-> *important!* log window message
 
--> [] deduct 60 xp points when bonking
-
-# labors
+# labors - ready to code - ask for details if needed
 
 [] !hunt
 
   -> [] background of a forest appears in some specific place on the canvas with dissolve (in case noone is doing hunting already)
 
-  -> LISA TODO [] png forest location png (same for gather)
+  -> LISA TODO [x] png forest location png (same for gather)
 
   -> [] user walks to that place (anywhere between x1 and x2, so all avatars don't just stand in one place)
 
@@ -54,15 +63,15 @@
 
 [] !gather
 
-  -> LISA TODO [] png forest location png (same for hunt)
+  -> LISA TODO [x] png forest location png (same for hunt)
 
 [] !mine
 
-  -> LISA TODO [] png cave location png
+  -> LISA TODO [x] png cave location png
 
 [] !fish
 
-  -> LISA TODO [] png lake location png
+  -> LISA TODO [x] png lake location png
 
 # item interactions
 
@@ -74,9 +83,11 @@
 
   ->
 
-# log window
+# random idea: character traits
 
-[] 
+-> specific people aquire specific (long-lasting?) traits over the course of the game?
+
+-> example: lonely - gets hugged twice as often / randomly by others
 
 # stats
 * info that gets saved and can be looked up, or that allows silly stuff like "AnnoyingEdu is the number 1 hugger" or "kirinokirino is the most active player!"
@@ -166,3 +177,9 @@
 [-] after hugging, avatars should walk off in separate directions (not in the same one)
 
 [x] *important!* avatar should walk around 2 times faster when going for a hug
+
+[x] deduct 30 xp points when hugging
+
+[x] log window: "%username spends 30 xp to hug %username!"
+
+-> [x] deduct 60 xp points when bonking
