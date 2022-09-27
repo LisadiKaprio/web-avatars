@@ -7,7 +7,7 @@ const fs = require("fs");
 // CHANNEL NAME
 const channelName = "LisadiKaprio";
 // is bot active?
-const botActive = true;
+let botActive = true;
 
 const COMMANDS = {
   //start bot
@@ -59,11 +59,12 @@ function deleteEveryUser() {
   }
 }
 
+
 function saveUser(username) {
   fs.writeFileSync(userFile(username), JSON.stringify(users[username]));
 }
 
-function putUserIntoObject(object, tags) {
+function putUserIntoObject(_object, tags) {
   // WHAT's IN THE USER?
   return {
     name: tags.username,
@@ -111,11 +112,11 @@ client.connect();
 
 // when client is connected to chat
 client.on("connected", (address, port) => {
-  console.log("Connected to chat!");
+  console.log("Connected to chat!" + address + port);
 });
 
 // when client recieves a normal chat message
-client.on("message", (channel, tags, message, self) => {
+client.on("message", (_channel, tags, message) => {
   // extract the username out of the tags?? T_T
   // i don't undewstand how this wowks but ok
   // so like const username = tags.username? or what?
@@ -255,7 +256,7 @@ client.on("message", (channel, tags, message, self) => {
 
 // COMMUNICATION WITH THE FRONTEND
 const express = require("express");
-const { URLSearchParams } = require("url");
+//const { URLSearchParams } = require("url");
 const app = express();
 
 // what port do we run on?
@@ -266,7 +267,7 @@ const port = 2501;
 app.use(express.static("src/frontend"));
 
 // what's displayed in localhost:2501
-app.get("/dbg", (req, res) => {
+app.get("/dbg", (_req, res) => {
   let filteredUsers = {};
   for (const name of activeUsers) {
     filteredUsers[name] = users[name];
@@ -281,7 +282,7 @@ app.get("/dbg", (req, res) => {
 });
 
 // send over the info inside the users variable
-app.get("/users", (req, res) => {
+app.get("/users", (_req, res) => {
   let filteredUsers = {};
   for (const name of activeUsers) {
     filteredUsers[name] = users[name];

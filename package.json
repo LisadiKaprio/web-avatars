@@ -21,5 +21,8 @@
   "dependencies": {
     "express": "^4.18.1",
     "tmi.js": "^1.8.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.24.0"
   }
 }
