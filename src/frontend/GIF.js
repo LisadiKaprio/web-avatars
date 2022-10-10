@@ -23,8 +23,8 @@
 // omggif is a JavaScript implementation of a GIF 89a encoder and decoder,
 // including animation and compression.  It does not rely on any specific
 // underlying system, so should run in the browser, Node, or Plask.
-
-"use strict";
+export { GifReader };
+/* eslint-disable */
 
 function GifReader(buf) {
   var p = 0;

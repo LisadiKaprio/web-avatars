@@ -1,4 +1,6 @@
-"use strict";
+export { BEHAVIOURS, ACTIONS, Avatar, Behaviour, actionPrice };
+import { ANIMATIONS, Sprite } from "./Sprite";
+import { createAdvancedBubble } from "./World";
 
 class Avatar {
   constructor(world, config) {

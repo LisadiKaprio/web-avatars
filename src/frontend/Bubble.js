@@ -1,4 +1,6 @@
-"use strict";
+export { Bubble };
+
+import { Sprite } from "./Sprite";
 
 class Bubble {
   constructor(config) {

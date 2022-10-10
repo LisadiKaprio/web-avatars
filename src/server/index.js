@@ -1,5 +1,3 @@
-"use strict";
-
 const tmi = require("tmi.js");
 const fs = require("fs");
 
