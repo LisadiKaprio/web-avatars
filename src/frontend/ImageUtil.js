@@ -1,3 +1,7 @@
+export { ImageUtil };
+
+import { GifReader } from "./GIF.js";
+
 // written by para >:( asshole
 // a class that handles images in the game
 // can handle both images that need to have a colorable mask on top (like character sprites with colored cloaks)
@@ -85,7 +89,7 @@ class ImageUtil {
     try {
       // attempt loading the image as gif
       // NOTE: this is a hack, and you should instead infer the image type from the request headers
-      return await _loadGif(imageRaw);
+      return await ImageUtil._loadGif(imageRaw);
     } catch (_) {
       // otherwise load it as static
       const finalImage = await this._loadImage(imageRaw);

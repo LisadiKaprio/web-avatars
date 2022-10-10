@@ -1,4 +1,6 @@
-"use strict";
+export { Emote };
+
+import { Sprite } from "./Sprite.js";
 
 class Emote {
   constructor(config) {

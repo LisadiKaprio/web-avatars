@@ -1,5 +1,7 @@
+export { Sprite, Animation, ANIMATIONS };
 //https://www.youtube.com/watch?v=bpbghr3NnUU
-"use strict";
+
+import { ImageUtil } from "./ImageUtil.js";
 
 // saves all the loaded images so they won't have to be loaded anew later
 const ImgCache = {};

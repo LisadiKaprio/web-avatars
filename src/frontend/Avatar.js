@@ -1,4 +1,6 @@
-"use strict";
+export { BEHAVIOURS, ACTIONS, Avatar, Behaviour, actionPrice };
+import { ANIMATIONS, Sprite } from "./Sprite.js";
+import { createAdvancedBubble } from "./World.js";
 
 class Avatar {
   constructor(world, config) {

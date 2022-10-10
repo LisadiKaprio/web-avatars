@@ -1,4 +1,9 @@
-"use strict";
+export { World, createAdvancedBubble };
+
+import { UPDATE_PERIOD } from "./index.js";
+import { BEHAVIOURS, ACTIONS, Behaviour, actionPrice, Avatar } from "./Avatar.js";
+import { Bubble } from "./Bubble.js";
+import { Emote } from "./Emote.js";
 
 const MESSAGES_ALL_OVER_THE_PLACE = false;
 const CHAT = {
@@ -131,11 +136,10 @@ class World {
           console.log(user);
           const userAvatar = this.userAvatars[user.name];
           this.chat.push({
-            text: `${
-              user.name
-            }'s behaviour: ${userAvatar.currentBehaviour.dbg()}, after that: ${JSON.stringify(
-              userAvatar.motivation.map((motivation) => motivation.name)
-            )}`,
+            text: `${user.name
+              }'s behaviour: ${userAvatar.currentBehaviour.dbg()}, after that: ${JSON.stringify(
+                userAvatar.motivation.map((motivation) => motivation.name)
+              )}`,
           });
         } else if (command == "clearUsers") {
           this.userAvatars = {};
@@ -221,10 +225,10 @@ class World {
       potentialTargets.length > 0
         ? potentialTargets
         : [
-            Object.keys(this.userAvatars)
-              .filter((name) => name != origin.name)
-              .random(),
-          ];
+          Object.keys(this.userAvatars)
+            .filter((name) => name != origin.name)
+            .random(),
+        ];
     const userAvatar = this.userAvatars[origin.name];
     let behaviours = [];
     for (const name of targets) {

@@ -1,5 +1,5 @@
-"use strict";
-
+import { World } from "./World.js";
+export { UPDATE_PERIOD };
 const UPDATE_PERIOD = 1000;
 let world;
 
