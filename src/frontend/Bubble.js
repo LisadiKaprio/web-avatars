@@ -1,6 +1,6 @@
 export { Bubble };
 
-import { Sprite } from "./Sprite";
+import { Sprite, Animation } from "./Sprite.js";
 
 class Bubble {
   constructor(config) {

@@ -1,9 +1,9 @@
 export { World, createAdvancedBubble };
 
 import { UPDATE_PERIOD } from "./index.js";
-import { BEHAVIOURS, ACTIONS, Behaviour, actionPrice, Avatar } from "./Avatar";
-import { Bubble } from "./Bubble";
-import { Emote } from "./Emote";
+import { BEHAVIOURS, ACTIONS, Behaviour, actionPrice, Avatar } from "./Avatar.js";
+import { Bubble } from "./Bubble.js";
+import { Emote } from "./Emote.js";
 
 const MESSAGES_ALL_OVER_THE_PLACE = false;
 const CHAT = {

@@ -1,6 +1,6 @@
 export { ImageUtil };
 
-import { GifReader } from "./GIF";
+import { GifReader } from "./GIF.js";
 
 // written by para >:( asshole
 // a class that handles images in the game
