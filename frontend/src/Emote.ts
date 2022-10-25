@@ -3,7 +3,8 @@ export { Emote };
 import { Sprite } from "./Sprite.js";
 
 class Emote {
-  constructor(config) {
+  // TODO
+  constructor(config: any) {
     this.x = config.x || 0;
     this.y = config.y || 950;
     this.toRemove = false;
@@ -16,7 +17,6 @@ class Emote {
       gameObject: this,
       src: config.src,
       mask: config.mask,
-      color: this.color,
     });
   }
 
@@ -31,4 +31,14 @@ class Emote {
       this.toRemove = true;
     }
   }
+}
+
+interface Emote {
+  x: number;
+  y: number;
+  toRemove: boolean;
+  speedPhysicsX: number;
+  speedPhysicsY: number;
+  dragPhysicsY: number;
+  sprite: Sprite;
 }
