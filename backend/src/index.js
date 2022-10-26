@@ -262,7 +262,7 @@ const port = 2501;
 
 // what folder will express start up?
 // where is our frontend
-app.use(express.static("src/frontend"));
+app.use(express.static("../frontend"));
 
 // what's displayed in localhost:2501
 app.get("/dbg", (_req, res) => {

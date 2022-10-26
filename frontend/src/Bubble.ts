@@ -3,7 +3,8 @@ export { Bubble };
 import { Sprite, Animation } from "./Sprite.js";
 
 class Bubble {
-  constructor(config) {
+  // TODO
+  constructor(config: any) {
     // username the bubble (can be) attached to, setting it will make the bubble move along
     this.attachedTo = config.attachedTo;
     this.toRemove = false;
@@ -92,7 +93,7 @@ class Bubble {
     }
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     let xOffset = 0;
     // If its attached to something, move the text to the updated position of the entity its attached to.
     if (this.attachedTo) {
@@ -102,13 +103,34 @@ class Bubble {
     ctx.globalAlpha = this.opacity;
     if (this.type == "text") {
       ctx.fillStyle = this.color;
-      ctx.fillText(this.text, this.x + xOffset, this.y);
+      ctx.fillText(this.text!, this.x + xOffset, this.y);
     } else if (this.type == "icon") {
-      this.sprite.draw(ctx, xOffset);
+      this.sprite!.draw(ctx, xOffset);
     } else {
       console.error("Unhandled bubble type");
       console.error(this);
     }
     ctx.globalAlpha = 1.0;
   }
+}
+
+interface Bubble {
+  attachedTo: any; // ?
+  toRemove: boolean;
+  x: number;
+  y: number;
+  color: string;
+  type: "icon" | "text";
+  src: string;
+  mask: string;
+  cutSize: number;
+  displaySize: number;
+  sprite?: Sprite;
+  text?: string;
+  behaviours: any; // TODO
+  behaviourLoop: any;
+  behaviourLoopIndex: number;
+  actionTime: number;
+  speed: number;
+  opacity: number;
 }

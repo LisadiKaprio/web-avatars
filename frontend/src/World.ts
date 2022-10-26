@@ -1,12 +1,26 @@
 export { World, createAdvancedBubble };
 
-import { UPDATE_PERIOD } from "./index.js";
-import { BEHAVIOURS, ACTIONS, Behaviour, actionPrice, Avatar } from "./Avatar.js";
+import {
+  UPDATE_PERIOD,
+  ServerMessages,
+  ServerUsers,
+  ServerUser,
+  ServerEmote,
+} from "./index.js";
+import {
+  BEHAVIOURS,
+  ACTIONS,
+  Behaviour,
+  actionPrice,
+  Avatar,
+  ActionType,
+} from "./Avatar.js";
 import { Bubble } from "./Bubble.js";
 import { Emote } from "./Emote.js";
+import { assertExists } from "./Helpers.js";
 
-const MESSAGES_ALL_OVER_THE_PLACE = false;
-const CHAT = {
+const MESSAGES_ALL_OVER_THE_PLACE: boolean = false;
+const CHAT: Chat = {
   x: 20,
   y: 20,
   fontSize: 18,
@@ -15,15 +29,19 @@ const CHAT = {
   outlineWidth: 0.4,
   outlineColor: "black",
 };
-const INACTIVE_TIME = 1000 * 60 * 20;
+const INACTIVE_TIME: number = 1000 * 60 * 20;
 
 class World {
-  constructor(config) {
-    // passing in an element
-    this.element = config.element;
-    // in this element, reference the canvas
-    this.canvas = this.element.querySelector(".game-canvas");
-    this.ctx = this.canvas.getContext("2d");
+  constructor(gameContainer: Element) {
+    this.element = gameContainer;
+    const canvas = this.element.querySelector(
+      ".game-canvas"
+    ) as HTMLCanvasElement;
+    assertExists(canvas);
+    this.canvas = canvas;
+    const context = this.canvas.getContext("2d");
+    assertExists(context);
+    this.ctx = context;
 
     this.userAvatars = {};
     this.renderedEmotes = [];
@@ -34,7 +52,11 @@ class World {
     this.time = 0;
   }
 
-  feedNewData(users, emotes, messages) {
+  feedNewData(
+    users: ServerUsers,
+    emotes: ServerEmote[],
+    messages: ServerMessages
+  ) {
     this.time += UPDATE_PERIOD;
 
     // difference between value and keys:
@@ -91,19 +113,16 @@ class World {
           for (const message of messages[name]) {
             this.chat.push({ text: message, color: avatar.color });
             this.renderedBubbles.push(
-              createAdvancedBubble(
-                {
-                  type: "text",
-                  text: message,
-                  x: Math.random() * this.canvas.width,
-                  y: Math.random() * this.canvas.height,
-                  behaviourLoop: [
-                    { type: "ascend", time: 100 },
-                    { type: "dissolve", time: 30 },
-                  ],
-                },
-                message
-              )
+              createAdvancedBubble({
+                type: "text",
+                text: message,
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                behaviourLoop: [
+                  { type: "ascend", time: 100 },
+                  { type: "dissolve", time: 30 },
+                ],
+              })
             );
           }
         }
@@ -114,7 +133,7 @@ class World {
     this.renderedEmotes.push(...createNewEmotes(emotes, this.userAvatars));
   }
 
-  handleCommands(user) {
+  handleCommands(user: ServerUser) {
     const commands = user.unhandledCommands;
     if (commands) {
       for (const { command, args, argUsers } of commands) {
@@ -136,10 +155,11 @@ class World {
           console.log(user);
           const userAvatar = this.userAvatars[user.name];
           this.chat.push({
-            text: `${user.name
-              }'s behaviour: ${userAvatar.currentBehaviour.dbg()}, after that: ${JSON.stringify(
-                userAvatar.motivation.map((motivation) => motivation.name)
-              )}`,
+            text: `${
+              user.name
+            }'s behaviour: ${userAvatar.currentBehaviour.dbg()}, after that: ${JSON.stringify(
+              userAvatar.motivation.map((motivation) => motivation.name)
+            )}`,
           });
         } else if (command == "clearUsers") {
           this.userAvatars = {};
@@ -150,7 +170,7 @@ class World {
     }
   }
 
-  update(timestep) {
+  update(timestep: number) {
     // clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -220,15 +240,31 @@ class World {
       this.ctx.strokeText(logLine.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
     }
   }
-  actionBetweenUsers(action, origin, potentialTargets) {
+  randomAvatarName(besides?: string): string {
+    const randomIndex = Math.floor(
+      Math.random() * Object.keys(this.userAvatars).length
+    );
+    if (besides) {
+      const result = Object.keys(this.userAvatars)
+        .filter((name) => name != besides)
+        .at(randomIndex);
+      assertExists(result);
+      return result;
+    } else {
+      const result = Object.keys(this.userAvatars).at(randomIndex);
+      assertExists(result);
+      return result;
+    }
+  }
+  actionBetweenUsers(
+    action: ActionType,
+    origin: ServerUser,
+    potentialTargets: string[]
+  ) {
     const targets =
       potentialTargets.length > 0
         ? potentialTargets
-        : [
-          Object.keys(this.userAvatars)
-            .filter((name) => name != origin.name)
-            .random(),
-        ];
+        : [this.randomAvatarName(origin.name)];
     const userAvatar = this.userAvatars[origin.name];
     let behaviours = [];
     for (const name of targets) {
@@ -252,7 +288,12 @@ class World {
   }
 }
 
-function createNewUserAvatar(world, user, x, time) {
+function createNewUserAvatar(
+  world: World,
+  user: ServerUser,
+  x: number,
+  time: number
+) {
   let avatar = new Avatar(world, {
     name: user.name,
     displayName: user.displayName,
@@ -267,7 +308,7 @@ function createNewUserAvatar(world, user, x, time) {
   return avatar;
 }
 
-function createTextBubble(origin, contents) {
+function createTextBubble(origin: Avatar, contents: string) {
   let xOffset = origin.sprite ? origin.sprite.displaySize / 2 : 0;
   const bubble = new Bubble({
     type: "text",
@@ -279,7 +320,8 @@ function createTextBubble(origin, contents) {
   return bubble;
 }
 
-function createAdvancedBubble(config) {
+// TODO
+function createAdvancedBubble(config: any) {
   let offset = config.spriteInfo ? config.spriteInfo.displaySize / 2 : 0;
   const bubble = new Bubble({
     type: config.type,
@@ -295,7 +337,7 @@ function createAdvancedBubble(config) {
   return bubble;
 }
 
-function createNewEmote(emoteId, x, y) {
+function createNewEmote(emoteId: number, x: number, y: number) {
   let emote = new Emote({
     x: x,
     y: y,
@@ -307,7 +349,7 @@ function createNewEmote(emoteId, x, y) {
   return emote;
 }
 
-function createNewEmotes(emotes, avatars) {
+function createNewEmotes(emotes: ServerEmote[], avatars: Avatars) {
   let newEmotes = [];
   for (let i = 0; i < emotes.length; i++) {
     let avatar = avatars[emotes[i].name];
@@ -319,8 +361,38 @@ function createNewEmotes(emotes, avatars) {
 }
 
 // get (normal twitchtv) emotes
-function getEmoteImg(emoteId) {
+function getEmoteImg(emoteId: number) {
   return (
     "https://static-cdn.jtvnw.net/emoticons/v2/" + emoteId + "/default/dark/2.0"
   );
+}
+
+type Avatars = {
+  [name: string]: Avatar;
+};
+
+interface World {
+  element: Element;
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  userAvatars: Avatars;
+  renderedEmotes: any[];
+  renderedBubbles: any[];
+  chat: ChatMessage[];
+  time: number;
+}
+
+interface Chat {
+  x: number;
+  y: number;
+  fontSize: number;
+  lineHeight: number;
+  maxLines: number;
+  outlineWidth: number;
+  outlineColor: string; //"black",
+}
+
+interface ChatMessage {
+  text: string;
+  color?: string;
 }

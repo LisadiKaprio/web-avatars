@@ -1,13 +1,14 @@
 export { BEHAVIOURS, ACTIONS, Avatar, Behaviour, actionPrice };
+import { assertExists } from "./Helpers.js";
 import { ANIMATIONS, Sprite } from "./Sprite.js";
-import { createAdvancedBubble } from "./World.js";
+import { createAdvancedBubble, World } from "./World.js";
 
 class Avatar {
-  constructor(world, config) {
+  // TODO
+  constructor(world: World, config: any) {
     // username
-    this.name = config.name === undefined ? "NoName" : config.name;
-    this.displayName =
-      config.displayName === undefined ? "NoName" : config.displayName;
+    this.name = config.name ?? "NoName";
+    this.displayName = config.displayName ?? "NoName";
     this.world = world;
     // define and pass in position, or else default to 0
     this.x = config.x || 0;
@@ -32,7 +33,7 @@ class Avatar {
       },
     });
 
-    this.actionTime = config.actionTime === undefined ? 24 : config.actionTime;
+    this.actionTime = config.actionTime ?? 24;
     this.speed = config.speed || 1.0;
 
     this.walkingTime = config.walkingTime || 300;
@@ -73,19 +74,20 @@ class Avatar {
     } else if (action.type == ACTIONS.go) {
       const speedMultiplier = 2.0;
       // TODO: only done for x.
-      const deltaX = action.x - this.x;
+      const x = action.x ?? 0;
+      const deltaX = x - this.x;
       if (deltaX > this.speed * speedMultiplier + 0.1) {
         this.x += this.speed * speedMultiplier;
       } else if (deltaX < -(this.speed * speedMultiplier + 0.1)) {
         this.x -= this.speed * speedMultiplier;
       } else {
-        this.x = action.x;
+        this.x = x;
         this.actionTime = 1;
       }
     }
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     this.sprite.draw(ctx);
     ctx.fillStyle = this.color;
     ctx.fillText(
@@ -101,7 +103,7 @@ class Avatar {
     this.popMotivation();
   }
 
-  pushMotivation(behaviour) {
+  pushMotivation(behaviour: Behaviour) {
     // check for the ordering
 
     // most urgent behaviours don't get swapped out
@@ -129,17 +131,19 @@ class Avatar {
   }
 
   popMotivation() {
-    if (this.motivation.length <= 0) {
+    if (this.motivation.length == 0) {
       if (!this.isActive) {
         this.pushMotivation(BEHAVIOURS.sleep);
       } else {
         this.pushMotivation(this.idleBehaviour);
       }
     }
-    this.changeBehaviour(this.motivation.pop());
+    const nextMotivation = this.motivation.pop();
+    assertExists(nextMotivation); // We would've added a motivation if we didn't have any.
+    this.changeBehaviour(nextMotivation);
   }
 
-  changeBehaviour(behaviour) {
+  changeBehaviour(behaviour: Behaviour) {
     this.currentBehaviour = behaviour;
     this.behaviourLoopIndex = -1;
     this.advanceBehaviour();
@@ -157,7 +161,8 @@ class Avatar {
     this.sprite.setAnimation("idle");
     if (action.type == ACTIONS.walk) {
       this.actionTime = Math.random() * this.walkingTime;
-      this.direction = action.direction;
+      const direction = action.direction ?? "left";
+      this.direction = direction;
     } else if (action.type == ACTIONS.stand) {
       this.actionTime = Math.random() * this.standTime;
     } else if (action.type == ACTIONS.talk) {
@@ -165,19 +170,19 @@ class Avatar {
       this.sprite.setAnimation("talk");
       this.actionTime = 9999;
     } else if (action.type == ACTIONS.hug) {
-      if (!this.getCloser(action.who)) {
-        if (action.who.canSwapBehaviour()) {
+      if (!this.getCloser(action.who!)) {
+        if (action.who!.canSwapBehaviour()) {
           // close enough for a hug, change animation of this and the other
           this.sprite.setAnimation("hug");
           this.actionTime = 100;
-          this.sprite.mirrored = this.x < action.who.x;
+          this.sprite.mirrored = this.x < action.who!.x;
           // sets sprite mirrored here, doesn't reset it
-          action.who.changeBehaviour(
+          action.who!.changeBehaviour(
             new Behaviour("hugged", [
               { type: "hugged", mirrored: !this.sprite.mirrored },
             ])
           );
-          this.showIcon({ x: (this.x + action.who.x) / 2 });
+          this.showIcon((this.x + action.who!.x) / 2);
         } else {
           this.actionTime = 25;
           this.currentBehaviour.insert(this.behaviourLoopIndex, {
@@ -186,18 +191,18 @@ class Avatar {
         }
       }
     } else if (action.type == ACTIONS.hugged) {
-      this.sprite.mirrored = action.mirrored;
+      this.sprite.mirrored = action.mirrored ?? false;
       this.sprite.setAnimation("hug");
       this.actionTime = 100;
     } else if (action.type == ACTIONS.bonk) {
-      if (!this.getCloser(action.who)) {
-        if (action.who.canSwapBehaviour()) {
+      if (!this.getCloser(action.who!)) {
+        if (action.who!.canSwapBehaviour()) {
           // close enough for a hug, change animation of this and the other
           this.sprite.setAnimation("bonk");
           this.actionTime = 300;
-          this.sprite.mirrored = this.x < action.who.x;
+          this.sprite.mirrored = this.x < action.who!.x;
           // sets sprite mirrored here, doesn't reset it
-          action.who.changeBehaviour(
+          action.who!.changeBehaviour(
             new Behaviour("bonked", [
               { type: "bonked", mirrored: this.sprite.mirrored },
             ])
@@ -210,7 +215,7 @@ class Avatar {
         }
       }
     } else if (action.type == ACTIONS.bonked) {
-      this.sprite.mirrored = action.mirrored;
+      this.sprite.mirrored = action.mirrored ?? false;
       this.sprite.setAnimation("bonked");
       this.actionTime = 300;
     } else if (action.type == ACTIONS.go) {
@@ -220,14 +225,14 @@ class Avatar {
 
   canSwapBehaviour() {
     return (
-      this.currentBehaviour.name != "hug" ||
-      this.currentBehaviour.name != "hugged" ||
-      this.currentBehaviour.name != "bonk" ||
+      this.currentBehaviour.name != "hug" &&
+      this.currentBehaviour.name != "hugged" &&
+      this.currentBehaviour.name != "bonk" &&
       this.currentBehaviour.name != "bonked"
     );
   }
 
-  getCloser(target) {
+  getCloser(target: Avatar) {
     // TODO: only done for x.
     const distance = target.x - this.x;
     // half of this sprite and half of the other sprite
@@ -248,7 +253,7 @@ class Avatar {
     }
   }
 
-  showIcon(config) {
+  showIcon(x: number) {
     const iconSize = 100;
     const iconSprite = {
       src: "images/bubble/action-items.png",
@@ -258,7 +263,7 @@ class Avatar {
     this.world.renderedBubbles.push(
       createAdvancedBubble({
         type: "icon",
-        x: config.x,
+        x: x,
         y: this.y - 20,
         spriteInfo: iconSprite,
       })
@@ -266,18 +271,28 @@ class Avatar {
   }
 }
 
+export type ActionType =
+  | "walk"
+  | "stand"
+  | "talk"
+  | "go"
+  | "hug"
+  | "hugged"
+  | "bonk"
+  | "bonked";
+
 const ACTIONS = {
-  walk: "walk", // direction: "left" || "right"
-  stand: "stand",
-  talk: "talk",
-  go: "go", // x: 0, y: 0
-  hug: "hug", // who: Avatar
-  hugged: "hugged",
-  bonk: "bonk",
-  bonked: "bonked",
+  walk: "walk" as ActionType, // direction: "left" || "right"
+  stand: "stand" as ActionType,
+  talk: "talk" as ActionType,
+  go: "go" as ActionType, // x: 0, y: 0
+  hug: "hug" as ActionType, // who: Avatar
+  hugged: "hugged" as ActionType,
+  bonk: "bonk" as ActionType,
+  bonked: "bonked" as ActionType,
 };
 
-function actionPrice(action) {
+function actionPrice(action: ActionType) {
   if (action == ACTIONS.hug) {
     return 30;
   }
@@ -287,7 +302,7 @@ function actionPrice(action) {
 }
 
 class Behaviour {
-  constructor(name, actions) {
+  constructor(name: string, actions: Action[]) {
     this.name = name;
     this.actions = actions;
   }
@@ -296,11 +311,11 @@ class Behaviour {
     this.actions.shift();
   }
 
-  unshift(action) {
+  unshift(action: Action) {
     this.actions.unshift(action);
   }
 
-  insert(place, action) {
+  insert(place: number, action: Action) {
     this.actions.splice(place, 0, action);
   }
 
@@ -325,3 +340,39 @@ const BEHAVIOURS = {
   talk: new Behaviour("talk", [{ type: ACTIONS.talk }]),
   sleep: new Behaviour("sleep", [{ type: ACTIONS.stand }]),
 };
+
+interface Avatar {
+  name: string;
+  displayName: string;
+  world: World;
+  x: number;
+  y: number;
+  toRemove: boolean;
+  color: string;
+  sprite: Sprite;
+  actionTime: number;
+  speed: number;
+  walkingTime: number;
+  standTime: number;
+  direction: "left" | "right";
+  idleBehaviour: Behaviour;
+  motivation: Behaviour[];
+  currentBehaviour: Behaviour;
+  behaviourLoopIndex: number;
+  isActive: boolean;
+  lastChatTime: number;
+}
+
+interface Behaviour {
+  name: string;
+  actions: Action[];
+}
+
+interface Action {
+  type: ActionType;
+  direction?: "left" | "right";
+  x?: number;
+  y?: number;
+  who?: Avatar;
+  mirrored?: boolean;
+}

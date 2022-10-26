@@ -2,10 +2,10 @@
   "name": "web-avatars",
   "description": "Web Avatars :)",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/server/index.js"
+    "start": "node ./src/index.js"
   },
   "repository": {
     "type": "git",

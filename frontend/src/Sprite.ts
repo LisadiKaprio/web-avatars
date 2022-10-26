@@ -7,16 +7,18 @@ import { ImageUtil } from "./ImageUtil.js";
 const ImgCache = {};
 
 class Animation {
-  constructor(config) {
-    this.frames = config.frames || [];
-    this.doesLoop = config.doesLoop;
+  constructor(config: { frames?: Frame[]; doesLoop?: boolean }) {
+    this.frames = config.frames ?? [];
+    this.doesLoop = config.doesLoop ?? true;
   }
 }
 
 class Sprite {
-  constructor(config) {
+  // TODO
+  constructor(config: any) {
+    // TODO
     // this happens when the ImageUtil finishes loading:
-    const loaded = (drawable) => {
+    const loaded = (drawable: any) => {
       this.drawable = drawable;
     };
 
@@ -49,7 +51,8 @@ class Sprite {
     this.gameObject = config.gameObject;
   }
 
-  setAnimation(animation) {
+  // TODO: fix animations.
+  setAnimation(animation: string) {
     this.currentAnimation = animation;
     this.currentAnimationFrame = 0;
   }
@@ -83,10 +86,10 @@ class Sprite {
     }
   }
 
-  draw(ctx, xOffset, yOffset) {
+  draw(ctx: CanvasRenderingContext2D, xOffset?: number, yOffset?: number) {
     // position control (add nudge if needed)
-    xOffset = xOffset ? xOffset : 0;
-    yOffset = yOffset ? yOffset : 0;
+    xOffset = xOffset ?? 0;
+    yOffset = yOffset ?? 0;
     const x = this.gameObject.x + xOffset;
     const y = this.gameObject.y + yOffset;
 
@@ -218,3 +221,27 @@ const ANIMATIONS = {
     doesLoop: false,
   }),
 };
+
+type Frame = [number, number];
+interface Animation {
+  frames: Frame[];
+  doesLoop: boolean;
+}
+type Animations = {
+  [animation: string]: Animation;
+};
+
+interface Sprite {
+  loaded: (drawable: any) => void;
+  drawable: any; // TODO
+  util: ImageUtil;
+  cutSize: number;
+  displaySize: number;
+  animations: Animations;
+  currentAnimation: string;
+  currentAnimationFrame: number;
+  animationFrameLimit: number;
+  animationFrameProgress: number;
+  mirrored: boolean;
+  gameObject: any; // ?
+}

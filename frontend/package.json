@@ -1,0 +1,27 @@
+{
+  "name": "web-avatars",
+  "description": "Web Avatars :)",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "check": "tsc --noEmit; eslint ./src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LisadiKaprio/web-avatars.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LisadiKaprio/web-avatars/issues"
+  },
+  "homepage": "https://github.com/LisadiKaprio/web-avatars#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^4.8",
+    "eslint": "^8.24.0"
+  }
+}
