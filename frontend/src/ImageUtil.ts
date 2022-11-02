@@ -43,7 +43,7 @@ class ImageUtil {
     let frameIdx = frames.length - 1;
     let last = 0;
 
-    const maybeAdvanceToNextFrame = () => {
+    const maybeAdvanceToNextFrame = (): void => {
       // check if delay has passed. if yes, go to next frame 
       // when the last frame is reached, start from frame 0 again
       const now = performance.now() / 10; // hundrets of a second
