@@ -9,35 +9,28 @@ import { GifReader } from "./GIF.js";
 
 class ImageUtil {
   // loads image and returns it as promise
-  async _loadImage(imageRaw) {
-    // if the imageRaw variable doesn't hold a path to the image,
-    // then the function returns whatever that variable holds
-    // ><?
-    if (typeof imageRaw !== "string") {
-      return imageRaw;
-    }
-
+  async _loadImage(imageSrc: string): Promise<HTMLImageElement> {
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
         resolve(img);
       };
-      img.src = imageRaw;
+      img.src = imageSrc;
     });
   }
 
-  async _loadGif(src) {
+  async _loadGif(src: string): Promise<Drawable> {
     const data = await fetch(src)
       .then((r) => r.arrayBuffer())
       .then((img) => new Uint8Array(img));
     const reader = new GifReader(data);
-    const frames = [];
+    const frames: { delay: number, image: ImageBitmap }[] = [];
     for (let i = 0, len = reader.numFrames(); i < len; ++i) {
       const pixels = new Uint8ClampedArray(4 * reader.width * reader.height);
       reader.decodeAndBlitFrameRGBA(i, pixels);
-      const finalImage = await createImageBitmap(new ImageData(pixels, reader.width, reader.height));
+      const image = await createImageBitmap(new ImageData(pixels, reader.width, reader.height));
       const { delay } = reader.frameInfo(i);
-      frames.push({ delay, finalImage });
+      frames.push({ delay, image });
     }
     if (frames.length === 0) {
       throw new Error("no frames in gif");
@@ -63,13 +56,13 @@ class ImageUtil {
     return {
       image: () => {
         maybeAdvanceToNextFrame();
-        return frames[frameIdx].finalImage;
+        return frames[frameIdx].image;
       }
     };
   }
 
   // the new canvas will be as big as the image itself
-  _createCanvas(width, height) {
+  _createCanvas(width: number, height: number): HTMLCanvasElement {
     const c = document.createElement("canvas");
     c.width = width;
     c.height = height;
@@ -78,14 +71,14 @@ class ImageUtil {
 
   // sprite with colored mask
   // three things need to go inside: the sprite, the mask of the sprite (the cloak), and the color it's supposed to be painted
-  async asMaskedDrawable(imageRaw, maskRaw, color) {
+  async asMaskedDrawable(imageSrc: string, maskSrc: string, color: string): Promise<Drawable> {
     // wait to load the sprite and its mask
-    const image = await this._loadImage(imageRaw);
-    const mask = await this._loadImage(maskRaw);
+    const image = await this._loadImage(imageSrc);
+    const mask = await this._loadImage(maskSrc);
 
     //create a new freakin canvas
     const c = this._createCanvas(image.width, image.height);
-    const ctx = c.getContext("2d"); // as CanvasRenderingContext2D
+    const ctx = c.getContext("2d") as CanvasRenderingContext2D
 
     // mask shenanigans
     ctx.save();
@@ -100,21 +93,24 @@ class ImageUtil {
     ctx.restore();
 
     // image bitmap? wut
-    const finalImage = await createImageBitmap(c);
+    const maskedImage = await createImageBitmap(c);
 
-    //
-    return { image: () => finalImage };
+    return { image: () => maskedImage };
   }
 
-  async asDrawable(imageRaw) {
+  async asDrawable(src: string): Promise<Drawable> {
     try {
       // attempt loading the image as gif
       // NOTE: this is a hack, and you should instead infer the image type from the request headers
-      return await this._loadGif(imageRaw);
+      return await this._loadGif(src);
     } catch (_) {
       // otherwise load it as static
-      const finalImage = await this._loadImage(imageRaw);
-      return { image: () => finalImage };
+      const image = await this._loadImage(src);
+      return { image: () => image };
     }
   }
+}
+
+interface Drawable {
+  image: () => HTMLImageElement | ImageBitmap,
 }
