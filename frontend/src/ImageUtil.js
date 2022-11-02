@@ -49,7 +49,10 @@ class ImageUtil {
     // actual first frame of the gif
     let frameIdx = frames.length - 1;
     let last = 0;
+
     const maybeAdvanceToNextFrame = () => {
+      // check if delay has passed. if yes, go to next frame 
+      // when the last frame is reached, start from frame 0 again
       const now = performance.now() / 10; // hundrets of a second
       if (now - last >= frames[frameIdx].delay) {
         frameIdx = frameIdx < (frames.length - 1) ? frameIdx + 1 : 0;
@@ -59,7 +62,6 @@ class ImageUtil {
 
     return {
       image: () => {
-        // check if delay has passed, if yes, go to next frame
         maybeAdvanceToNextFrame();
         return frames[frameIdx].finalImage;
       }
