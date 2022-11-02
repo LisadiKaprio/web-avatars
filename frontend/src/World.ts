@@ -15,7 +15,7 @@ import {
   Avatar,
   ActionType,
 } from "./Avatar.js";
-import { Bubble } from "./Bubble.js";
+import { Bubble, BubbleType } from "./Bubble.js";
 import { Emote } from "./Emote.js";
 import { assertExists } from "./Helpers.js";
 
@@ -311,7 +311,7 @@ function createNewUserAvatar(
 function createTextBubble(origin: Avatar, contents: string) {
   let xOffset = origin.sprite ? origin.sprite.displaySize / 2 : 0;
   const bubble = new Bubble({
-    type: "text",
+    type: BubbleType.TEXT,
     //attachedTo: origin,
     x: origin.x + xOffset,
     y: origin.y - 0,
@@ -323,18 +323,28 @@ function createTextBubble(origin: Avatar, contents: string) {
 // TODO
 function createAdvancedBubble(config: any) {
   let offset = config.spriteInfo ? config.spriteInfo.displaySize / 2 : 0;
-  const bubble = new Bubble({
-    type: config.type,
-    //attachedTo: origin,
-    x: config.x,
-    y: config.y - offset,
-    text: config.text,
-    displaySize: config.spriteInfo ? config.spriteInfo.displaySize : undefined,
-    cutSize: config.spriteInfo ? config.spriteInfo.cutSize : undefined,
-    src: config.spriteInfo ? config.spriteInfo.src : undefined,
-    behaviourLoop: config.behaviourLoop,
-  });
-  return bubble;
+  if (config.type === BubbleType.TEXT) {
+    return new Bubble({
+      type: config.type,
+      //attachedTo: origin,
+      x: config.x,
+      y: config.y - offset,
+      text: config.text as string,
+    });
+  }
+  if (config.type === BubbleType.ICON) {
+    return new Bubble({
+      type: config.type,
+      //attachedTo: origin,
+      x: config.x,
+      y: config.y - offset,
+      displaySize: config.spriteInfo ? config.spriteInfo.displaySize : undefined,
+      cutSize: config.spriteInfo ? config.spriteInfo.cutSize : undefined,
+      src: config.spriteInfo ? config.spriteInfo.src : undefined,
+      behaviourLoop: config.behaviourLoop,
+    });
+  }
+  throw new Error('config type must be "text" or "icon"');
 }
 
 function createNewEmote(emoteId: number, x: number, y: number) {

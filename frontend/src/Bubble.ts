@@ -1,10 +1,9 @@
 export { Bubble };
 
-import { Sprite, Animation } from "./Sprite.js";
+import { Sprite, Animation, Animations } from "./Sprite.js";
 
 class Bubble {
-  // TODO
-  constructor(config: any) {
+  constructor(config: IconBubbleConfig | TextBubbleConfig) {
     // username the bubble (can be) attached to, setting it will make the bubble move along
     this.attachedTo = config.attachedTo;
     this.toRemove = false;
@@ -15,7 +14,7 @@ class Bubble {
     // type is either "text" or "icon",
     // config would provide either text or sprite depending on the type
     this.type = config.type;
-    if (config.type == "icon") {
+    if (config.type == BubbleType.ICON) {
       this.sprite = new Sprite({
         gameObject: this,
         src: config.src,
@@ -33,7 +32,7 @@ class Bubble {
           }),
         },
       });
-    } else if (config.type == "text") {
+    } else if (config.type == BubbleType.TEXT) {
       this.text = config.text;
     }
 
@@ -114,13 +113,41 @@ class Bubble {
   }
 }
 
+export enum BubbleType {
+  ICON = "icon",
+  TEXT = "text",
+}
+
+interface BubbleConfig {
+  attachedTo?: any // ? TODO
+  x?: number
+  y?: number
+  color?: string
+  behaviourLoop?: any[] // ? TODO
+  speed?: number
+}
+
+interface IconBubbleConfig extends BubbleConfig {
+  type: BubbleType.ICON
+  src: any // ? TODO
+  mask?: any // ? TODO
+  cutSize: number
+  displaySize: number
+  animations?: Animations
+}
+
+interface TextBubbleConfig extends BubbleConfig {
+  type: BubbleType.TEXT
+  text: string
+}
+
 interface Bubble {
   attachedTo: any; // ?
   toRemove: boolean;
   x: number;
   y: number;
   color: string;
-  type: "icon" | "text";
+  type: BubbleType;
   src: string;
   mask: string;
   cutSize: number;

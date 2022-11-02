@@ -223,7 +223,7 @@ interface Animation {
   frames: Frame[];
   doesLoop: boolean;
 }
-type Animations = {
+export type Animations = {
   [animation: string]: Animation;
 };
 
