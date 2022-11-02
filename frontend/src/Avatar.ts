@@ -179,14 +179,14 @@ class Avatar {
           // sets sprite mirrored here, doesn't reset it
           action.who!.changeBehaviour(
             new Behaviour("hugged", [
-              { type: "hugged", mirrored: !this.sprite.mirrored },
+              { type: ActionType.HUGGED, mirrored: !this.sprite.mirrored },
             ])
           );
           this.showIcon((this.x + action.who!.x) / 2);
         } else {
           this.actionTime = 25;
           this.currentBehaviour.insert(this.behaviourLoopIndex, {
-            type: "stand",
+            type: ActionType.STAND,
           });
         }
       }
@@ -204,13 +204,13 @@ class Avatar {
           // sets sprite mirrored here, doesn't reset it
           action.who!.changeBehaviour(
             new Behaviour("bonked", [
-              { type: "bonked", mirrored: this.sprite.mirrored },
+              { type: ActionType.BONKED, mirrored: this.sprite.mirrored },
             ])
           );
         } else {
           this.actionTime = 25;
           this.currentBehaviour.insert(this.behaviourLoopIndex, {
-            type: "stand",
+            type: ActionType.STAND,
           });
         }
       }
@@ -243,7 +243,7 @@ class Avatar {
       // TODO: if too close maybe need to step away a little bit.
       this.actionTime = 100;
       this.currentBehaviour.insert(this.behaviourLoopIndex, {
-        type: "go",
+        type: ActionType.GO,
         x: target.x - padding * Math.sign(distance),
         y: target.y,
       });
@@ -271,25 +271,26 @@ class Avatar {
   }
 }
 
-export type ActionType =
-  | "walk"
-  | "stand"
-  | "talk"
-  | "go"
-  | "hug"
-  | "hugged"
-  | "bonk"
-  | "bonked";
+export enum ActionType {
+  WALK = "walk",
+  STAND = "stand",
+  TALK = "talk",
+  GO = "go",
+  HUG = "hug",
+  HUGGED = "hugged",
+  BONK = "bonk",
+  BONKED = "bonked"
+}
 
 const ACTIONS = {
-  walk: "walk" as ActionType, // direction: "left" || "right"
-  stand: "stand" as ActionType,
-  talk: "talk" as ActionType,
-  go: "go" as ActionType, // x: 0, y: 0
-  hug: "hug" as ActionType, // who: Avatar
-  hugged: "hugged" as ActionType,
-  bonk: "bonk" as ActionType,
-  bonked: "bonked" as ActionType,
+  walk: ActionType.WALK, // direction: "left" || "right"
+  stand: ActionType.STAND,
+  talk: ActionType.TALK,
+  go: ActionType.GO, // x: 0, y: 0
+  hug: ActionType.HUG, // who: Avatar
+  hugged: ActionType.HUGGED,
+  bonk: ActionType.BONK,
+  bonked: ActionType.BONKED,
 };
 
 function actionPrice(action: ActionType) {
@@ -332,10 +333,10 @@ class Behaviour {
 
 const BEHAVIOURS = {
   idle: new Behaviour("idle", [
-    { type: "walk", direction: "left" },
-    { type: "stand" },
-    { type: "walk", direction: "right" },
-    { type: "stand" },
+    { type: ActionType.WALK, direction: "left" },
+    { type: ActionType.STAND },
+    { type: ActionType.WALK, direction: "right" },
+    { type: ActionType.STAND },
   ]),
   talk: new Behaviour("talk", [{ type: ACTIONS.talk }]),
   sleep: new Behaviour("sleep", [{ type: ACTIONS.stand }]),
