@@ -3,9 +3,6 @@ export { Sprite, Animation, ANIMATIONS };
 
 import { ImageUtil } from "./ImageUtil.js";
 
-// saves all the loaded images so they won't have to be loaded anew later
-const ImgCache = {};
-
 class Animation {
   constructor(config: { frames?: Frame[]; doesLoop?: boolean }) {
     this.frames = config.frames ?? [];
