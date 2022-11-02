@@ -338,7 +338,7 @@ function createAdvancedBubble(config: any) {
 }
 
 function createNewEmote(emoteId: number, x: number, y: number) {
-  let emote = new Emote({
+  const emote = new Emote({
     x: x,
     y: y,
     src: getEmoteImg(emoteId),

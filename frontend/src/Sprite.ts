@@ -11,8 +11,7 @@ class Animation {
 }
 
 class Sprite {
-  // TODO
-  constructor(config: any) {
+  constructor(config: SpriteConfig) {
     // TODO
     // this happens when the ImageUtil finishes loading:
     const loaded = (drawable: any) => {
@@ -227,6 +226,18 @@ interface Animation {
 type Animations = {
   [animation: string]: Animation;
 };
+
+interface SpriteConfig {
+  src: any
+  mask?: any
+  color?: any
+  cutSize?: number
+  displaySize?: number
+  animations?: Animations
+  currentAnimation?: string
+  animationFrameLimit?: number
+  gameObject: any
+}
 
 interface Sprite {
   loaded: (drawable: any) => void;
