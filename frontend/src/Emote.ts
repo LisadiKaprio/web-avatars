@@ -3,8 +3,7 @@ export { Emote };
 import { Sprite } from "./Sprite.js";
 
 class Emote {
-  // TODO
-  constructor(config: any) {
+  constructor(config: EmoteConfig) {
     this.x = config.x || 0;
     this.y = config.y || 950;
     this.toRemove = false;
@@ -16,7 +15,6 @@ class Emote {
     this.sprite = new Sprite({
       gameObject: this,
       src: config.src,
-      mask: config.mask,
     });
   }
 
@@ -31,6 +29,15 @@ class Emote {
       this.toRemove = true;
     }
   }
+}
+
+interface EmoteConfig {
+  src: any
+  x: number
+  y: number
+  speedPhysicsX: number
+  speedPhysicsY: number
+  dragPhysicsY: number
 }
 
 interface Emote {

@@ -3,9 +3,6 @@ export { Sprite, Animation, ANIMATIONS };
 
 import { ImageUtil } from "./ImageUtil.js";
 
-// saves all the loaded images so they won't have to be loaded anew later
-const ImgCache = {};
-
 class Animation {
   constructor(config: { frames?: Frame[]; doesLoop?: boolean }) {
     this.frames = config.frames ?? [];
@@ -14,8 +11,7 @@ class Animation {
 }
 
 class Sprite {
-  // TODO
-  constructor(config: any) {
+  constructor(config: SpriteConfig) {
     // TODO
     // this happens when the ImageUtil finishes loading:
     const loaded = (drawable: any) => {
@@ -227,9 +223,21 @@ interface Animation {
   frames: Frame[];
   doesLoop: boolean;
 }
-type Animations = {
+export type Animations = {
   [animation: string]: Animation;
 };
+
+interface SpriteConfig {
+  src: any
+  mask?: any
+  color?: any
+  cutSize?: number
+  displaySize?: number
+  animations?: Animations
+  currentAnimation?: string
+  animationFrameLimit?: number
+  gameObject: any
+}
 
 interface Sprite {
   loaded: (drawable: any) => void;
