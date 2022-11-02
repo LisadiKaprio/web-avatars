@@ -8,12 +8,12 @@ import {
   ServerEmote,
 } from "./index.js";
 import {
-  BEHAVIOURS,
-  Behaviour,
   actionPrice,
-  Avatar,
   ActionType,
+  Avatar,
+  Behaviour,
   BehaviourName,
+  BEHAVIOURS,
 } from "./Avatar.js";
 import { Bubble } from "./Bubble.js";
 import { Emote } from "./Emote.js";
