@@ -1,4 +1,4 @@
-export { BEHAVIOURS, ACTIONS, Avatar, Behaviour, actionPrice };
+export { BEHAVIOURS, Avatar, Behaviour, actionPrice };
 import { assertExists } from "./Helpers.js";
 import { ANIMATIONS, Sprite } from "./Sprite.js";
 import { createAdvancedBubble, World } from "./World.js";
@@ -59,7 +59,7 @@ class Avatar {
       this.advanceBehaviour();
     }
     let action = this.currentBehaviour.actions[this.behaviourLoopIndex];
-    if (action.type == ACTIONS.walk) {
+    if (action.type == ActionType.WALK) {
       if (this.x >= 1920 - 150) {
         this.direction = "left";
       }
@@ -71,7 +71,7 @@ class Avatar {
       } else if (this.direction == "right") {
         this.x += this.speed;
       }
-    } else if (action.type == ACTIONS.go) {
+    } else if (action.type == ActionType.GO) {
       const speedMultiplier = 2.0;
       // TODO: only done for x.
       const x = action.x ?? 0;
@@ -159,17 +159,17 @@ class Avatar {
 
     let action = this.currentBehaviour.actions[this.behaviourLoopIndex];
     this.sprite.setAnimation("idle");
-    if (action.type == ACTIONS.walk) {
+    if (action.type == ActionType.WALK) {
       this.actionTime = Math.random() * this.walkingTime;
       const direction = action.direction ?? "left";
       this.direction = direction;
-    } else if (action.type == ACTIONS.stand) {
+    } else if (action.type == ActionType.STAND) {
       this.actionTime = Math.random() * this.standTime;
-    } else if (action.type == ACTIONS.talk) {
+    } else if (action.type == ActionType.TALK) {
       // play out all the frames of animation, then animation advances to next behaviour
       this.sprite.setAnimation("talk");
       this.actionTime = 9999;
-    } else if (action.type == ACTIONS.hug) {
+    } else if (action.type == ActionType.HUG) {
       if (!this.getCloser(action.who!)) {
         if (action.who!.canSwapBehaviour()) {
           // close enough for a hug, change animation of this and the other
@@ -178,7 +178,7 @@ class Avatar {
           this.sprite.mirrored = this.x < action.who!.x;
           // sets sprite mirrored here, doesn't reset it
           action.who!.changeBehaviour(
-            new Behaviour("hugged", [
+            new Behaviour(BehaviourName.HUGGED, [
               { type: ActionType.HUGGED, mirrored: !this.sprite.mirrored },
             ])
           );
@@ -190,11 +190,11 @@ class Avatar {
           });
         }
       }
-    } else if (action.type == ACTIONS.hugged) {
+    } else if (action.type == ActionType.HUGGED) {
       this.sprite.mirrored = action.mirrored ?? false;
       this.sprite.setAnimation("hug");
       this.actionTime = 100;
-    } else if (action.type == ACTIONS.bonk) {
+    } else if (action.type == ActionType.BONK) {
       if (!this.getCloser(action.who!)) {
         if (action.who!.canSwapBehaviour()) {
           // close enough for a hug, change animation of this and the other
@@ -203,7 +203,7 @@ class Avatar {
           this.sprite.mirrored = this.x < action.who!.x;
           // sets sprite mirrored here, doesn't reset it
           action.who!.changeBehaviour(
-            new Behaviour("bonked", [
+            new Behaviour(BehaviourName.BONKED, [
               { type: ActionType.BONKED, mirrored: this.sprite.mirrored },
             ])
           );
@@ -214,21 +214,21 @@ class Avatar {
           });
         }
       }
-    } else if (action.type == ACTIONS.bonked) {
+    } else if (action.type == ActionType.BONKED) {
       this.sprite.mirrored = action.mirrored ?? false;
       this.sprite.setAnimation("bonked");
       this.actionTime = 300;
-    } else if (action.type == ACTIONS.go) {
+    } else if (action.type == ActionType.GO) {
       this.actionTime = 100;
     }
   }
 
   canSwapBehaviour() {
     return (
-      this.currentBehaviour.name != "hug" &&
-      this.currentBehaviour.name != "hugged" &&
-      this.currentBehaviour.name != "bonk" &&
-      this.currentBehaviour.name != "bonked"
+      this.currentBehaviour.name != BehaviourName.HUG &&
+      this.currentBehaviour.name != BehaviourName.HUGGED &&
+      this.currentBehaviour.name != BehaviourName.BONK &&
+      this.currentBehaviour.name != BehaviourName.BONKED
     );
   }
 
@@ -271,39 +271,38 @@ class Avatar {
   }
 }
 
-export enum ActionType {
-  WALK = "walk",
-  STAND = "stand",
+export enum BehaviourName {
+  BONK = "bonk",
+  BONKED = "bonked",
+  HUG = "hug",
+  HUGGED = "hugged",
+  IDLE = "idle",
+  SLEEP = "sleep",
   TALK = "talk",
+}
+
+export enum ActionType {
+  BONK = "bonk",
+  BONKED = "bonked",
   GO = "go",
   HUG = "hug",
   HUGGED = "hugged",
-  BONK = "bonk",
-  BONKED = "bonked"
+  STAND = "stand",
+  TALK = "talk",
+  WALK = "walk",
 }
 
-const ACTIONS = {
-  walk: ActionType.WALK, // direction: "left" || "right"
-  stand: ActionType.STAND,
-  talk: ActionType.TALK,
-  go: ActionType.GO, // x: 0, y: 0
-  hug: ActionType.HUG, // who: Avatar
-  hugged: ActionType.HUGGED,
-  bonk: ActionType.BONK,
-  bonked: ActionType.BONKED,
-};
-
 function actionPrice(action: ActionType) {
-  if (action == ACTIONS.hug) {
+  if (action == ActionType.HUG) {
     return 30;
   }
-  if (action == ACTIONS.bonk) {
+  if (action == ActionType.BONK) {
     return 60;
   }
 }
 
 class Behaviour {
-  constructor(name: string, actions: Action[]) {
+  constructor(name: BehaviourName, actions: Action[]) {
     this.name = name;
     this.actions = actions;
   }
@@ -332,14 +331,14 @@ class Behaviour {
 }
 
 const BEHAVIOURS = {
-  idle: new Behaviour("idle", [
+  idle: new Behaviour(BehaviourName.IDLE, [
     { type: ActionType.WALK, direction: "left" },
     { type: ActionType.STAND },
     { type: ActionType.WALK, direction: "right" },
     { type: ActionType.STAND },
   ]),
-  talk: new Behaviour("talk", [{ type: ACTIONS.talk }]),
-  sleep: new Behaviour("sleep", [{ type: ACTIONS.stand }]),
+  talk: new Behaviour(BehaviourName.TALK, [{ type: ActionType.TALK }]),
+  sleep: new Behaviour(BehaviourName.SLEEP, [{ type: ActionType.STAND }]),
 };
 
 interface Avatar {
@@ -365,7 +364,7 @@ interface Avatar {
 }
 
 interface Behaviour {
-  name: string;
+  name: BehaviourName;
   actions: Action[];
 }
 

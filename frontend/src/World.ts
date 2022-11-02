@@ -9,11 +9,11 @@ import {
 } from "./index.js";
 import {
   BEHAVIOURS,
-  ACTIONS,
   Behaviour,
   actionPrice,
   Avatar,
   ActionType,
+  BehaviourName,
 } from "./Avatar.js";
 import { Bubble } from "./Bubble.js";
 import { Emote } from "./Emote.js";
@@ -137,10 +137,10 @@ class World {
     const commands = user.unhandledCommands;
     if (commands) {
       for (const { command, args, argUsers } of commands) {
-        if (command == ACTIONS.hug) {
-          this.actionBetweenUsers(ACTIONS.hug, user, argUsers);
-        } else if (command == ACTIONS.bonk) {
-          this.actionBetweenUsers(ACTIONS.bonk, user, argUsers);
+        if (command == ActionType.HUG) {
+          this.actionBetweenUsers(BehaviourName.HUG, ActionType.HUG, user, argUsers);
+        } else if (command == ActionType.BONK) {
+          this.actionBetweenUsers(BehaviourName.BONK, ActionType.BONK, user, argUsers);
         } else if (command == "whoami") {
           this.chat.push({
             text: `you are ${user.name}`,
@@ -257,6 +257,7 @@ class World {
     }
   }
   actionBetweenUsers(
+    behaviourName: BehaviourName,
     action: ActionType,
     origin: ServerUser,
     potentialTargets: string[]
@@ -277,7 +278,7 @@ class World {
           )}xp to ${action} ${target.displayName}`,
           color: origin.color,
         });
-        behaviours.push(new Behaviour(action, [{ type: action, who: target }]));
+        behaviours.push(new Behaviour(behaviourName, [{ type: action, who: target }]));
       }
     }
     if (behaviours.length > 0) {
