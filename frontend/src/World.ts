@@ -241,20 +241,14 @@ class World {
     }
   }
   randomAvatarName(besides?: string): string {
-    const randomIndex = Math.floor(
-      Math.random() * Object.keys(this.userAvatars).length
-    );
+    let names: string[] = Object.keys(this.userAvatars);
     if (besides) {
-      const result = Object.keys(this.userAvatars)
-        .filter((name) => name != besides)
-        .at(randomIndex);
-      assertExists(result);
-      return result;
-    } else {
-      const result = Object.keys(this.userAvatars).at(randomIndex);
-      assertExists(result);
-      return result;
+      names = names.filter((name) => name != besides);
     }
+    const randomIndex = Math.floor(Math.random() * names.length);
+    const result = names.at(randomIndex);
+    assertExists(result);
+    return result;
   }
   actionBetweenUsers(
     action: ActionType,
