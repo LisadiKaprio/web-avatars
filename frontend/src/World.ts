@@ -23,8 +23,10 @@ const MESSAGES_ALL_OVER_THE_PLACE: boolean = false;
 const CHAT: Chat = {
   x: 20,
   y: 20,
-  fontSize: 18,
-  lineHeight: 24,
+  width: 600,
+  fontSize: 22,
+  lineHeight: 42,
+  containerColor: "#22222210",
   maxLines: 3,
   outlineWidth: 0.4,
   outlineColor: "black",
@@ -109,7 +111,7 @@ class World {
         );
 
         // log the message in chat and add a message bubble
-        if (MESSAGES_ALL_OVER_THE_PLACE) {
+        if (MESSAGES_ALL_OVER_THE_PLACE && messages[name]) {
           for (const message of messages[name]) {
             this.chat.push({ text: message, color: avatar.color });
             this.renderedBubbles.push(
@@ -155,11 +157,10 @@ class World {
           console.log(user);
           const userAvatar = this.userAvatars[user.name];
           this.chat.push({
-            text: `${
-              user.name
-            }'s behaviour: ${userAvatar.currentBehaviour.dbg()}, after that: ${JSON.stringify(
-              userAvatar.motivation.map((motivation) => motivation.name)
-            )}`,
+            text: `${user.name
+              }'s behaviour: ${userAvatar.currentBehaviour.dbg()}, after that: ${JSON.stringify(
+                userAvatar.motivation.map((motivation) => motivation.name)
+              )}`,
           });
         } else if (command == "clearUsers") {
           this.userAvatars = {};
@@ -235,9 +236,20 @@ class World {
 
     for (let i = 0; i < this.chat.length; i++) {
       const logLine = this.chat[i];
+      const ratio = this.ctx.measureText(logLine.text).width / CHAT.width;
+      let textCutTo = logLine.text.length;
+      if (ratio > 1) {
+        textCutTo = Math.floor(logLine.text.length / ratio);
+      }
+      let text = logLine.text.substring(0, textCutTo);
+      const y = CHAT.y + (i + 1) * CHAT.lineHeight;
+      const containerPadding = 12;
+      const containerHeight = CHAT.lineHeight - containerPadding;
+      this.ctx.fillStyle = CHAT.containerColor;
+      this.ctx.fillRect(CHAT.x, y - containerHeight + containerPadding / 2, CHAT.width, containerHeight);
       this.ctx.fillStyle = logLine.color ? logLine.color : "grey";
-      this.ctx.fillText(logLine.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
-      this.ctx.strokeText(logLine.text, CHAT.x, CHAT.y + i * CHAT.lineHeight);
+      this.ctx.fillText(text, CHAT.x + 4, y, CHAT.width - 4);
+      this.ctx.strokeText(text, CHAT.x + 4, y, CHAT.width - 4);
     }
   }
   randomAvatarName(besides?: string): string {
@@ -390,7 +402,9 @@ interface World {
 interface Chat {
   x: number;
   y: number;
+  width: number;
   fontSize: number;
+  containerColor: string;
   lineHeight: number;
   maxLines: number;
   outlineWidth: number;
