@@ -1,6 +1,6 @@
 #!/usr/bin/env -S deno run --allow-net=irc-ws.chat.twitch.tv --allow-read="./data","../frontend" --allow-write="./data" 
-import * as TwitchIrc from "https://deno.land/x/twitch_irc/mod.ts";
-import { ChannelRole } from "https://deno.land/x/twitch_irc/mod.ts";
+import * as TwitchIrc from "https://deno.land/x/twitch_irc@0.11.0/mod.ts";
+import { ChannelRole } from "https://deno.land/x/twitch_irc@0.11.0/mod.ts";
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 
 //= = = my own variables = = =
@@ -257,14 +257,12 @@ client.on("privmsg", ({ message, emotes, sentAt, user, raw, ...rest }) => {
         // console.log(emotes);
         // console.log(raw.tags?.emotes);
         for (let emote of emotes) {
-          // TODO: ensure that there are as many entries as there are emotes
-          // (and not one emote id containing multiple ranges)
-          // for (let range of emote.range) {
-          //   newEmotes.push({
-          //     name: username,
-          //     id: emote.id,
-          //   });
-          // }
+          for (let range of emote.ranges) {
+            newEmotes.push({
+              name: username,
+              id: emote.id,
+            });
+          }
         }
         // for each emote in message
         // emote[1] = { who: kirinokirino, id: 65}
