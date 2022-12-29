@@ -1,2 +1,5 @@
 backend/node_modules
 backend/data/users
+node_modules
+frontend/package-lock.json
+package-lock.json

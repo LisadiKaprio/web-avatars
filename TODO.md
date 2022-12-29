@@ -1,19 +1,11 @@
 
 ## bugs
 
-[] bug: hugged a person twice (nc_para_) (situation: !hug bacing, !hug lisadikaprio; what happened: hugged bacing, then hugged lisa, then hugged bacing again, then talking animation happened)
-
-[] *important!* bug: not all animated emotes displaying (lisadiAchanchanchanteachan displaying, anim emotes from edu's / anomon's channels aren't displaying)
-
--> caching issue? (why is achan emote displaying hmmm)
-
--> compression issue?
+[] *important!* bug: interrupted by talking animation while walking to bonk (LisadiKaprio)
 
 ## misc
 
 [] handle changing user color (preferably change color of the avatarright away)
-
-[] *important!* bug: interrupted by talking animation while walking to bonk (LisadiKaprio)
 
 [] *important!* <3 emojis flying around like emotes:
 
