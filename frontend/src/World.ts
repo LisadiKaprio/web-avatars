@@ -83,6 +83,11 @@ class World {
       // handle user commands
       this.handleCommands(user);
 
+      if (messages[name]) {
+        let avatar = this.userAvatars[name];
+		this.renderedEmotes.push(...createNewEmojis(messages[name], avatar.x, avatar.y));
+      }
+
       // handle user messages
       if (messages[name] || emotes.some((emote) => emote.name == name)) {
         let avatar = this.userAvatars[name];
@@ -352,6 +357,27 @@ function createAdvancedBubble(config: any) {
     });
   }
   throw new Error('config type must be "text" or "icon"');
+}
+
+
+function createNewEmojis(messages: string[], x: number, y: number) {
+	const emotes: Emote[] = [];
+	for (let message of messages) {
+		const matches = message.match(/(\p{EPres}|\p{ExtPict})(\u200d(\p{EPres}|\p{ExtPict})\ufe0f?)*/gu);
+	    matches?.forEach((m) => {
+		    const code = [...m].map(e => e.codePointAt(0)!.toString(16)).join(`-`);
+		    const emote = new Emote({
+			    x: x,
+			    y: y,
+			    src: `https://twemoji.maxcdn.com/v/14.0.2/72x72/${code}.png`,
+			    speedPhysicsX: Math.random() * 6 - 3,
+			    speedPhysicsY: -(Math.random() * 5),
+			    dragPhysicsY: -0.02,
+		  	});
+		  	emotes.push(emote);
+		});
+	}
+	return emotes;
 }
 
 function createNewEmote(emoteId: number, x: number, y: number) {
