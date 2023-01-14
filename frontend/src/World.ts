@@ -369,7 +369,7 @@ function createNewEmojis(messages: string[], x: number, y: number) {
 		    const emote = new Emote({
 			    x: x,
 			    y: y,
-			    src: `https://twemoji.maxcdn.com/v/14.0.2/72x72/${code}.png`,
+			    src: `https://cdn.betterttv.net/assets/emoji/${code}.svg`,
 			    speedPhysicsX: Math.random() * 6 - 3,
 			    speedPhysicsY: -(Math.random() * 5),
 			    dragPhysicsY: -0.02,
