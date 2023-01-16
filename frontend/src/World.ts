@@ -370,6 +370,8 @@ function createNewEmojis(messages: string[], x: number, y: number) {
 			    x: x,
 			    y: y,
 			    src: `https://cdn.betterttv.net/assets/emoji/${code}.svg`,
+				cutSize: 1300,
+				displaySize: 50,
 			    speedPhysicsX: Math.random() * 6 - 3,
 			    speedPhysicsY: -(Math.random() * 5),
 			    dragPhysicsY: -0.02,
