@@ -15,6 +15,8 @@ class Emote {
     this.sprite = new Sprite({
       gameObject: this,
       src: config.src,
+      cutSize: config.cutSize || 300,
+      displaySize: config.displaySize || 150,
     });
   }
 
@@ -35,6 +37,8 @@ interface EmoteConfig {
   src: any
   x: number
   y: number
+  cutSize?: number
+  displaySize?: number
   speedPhysicsX: number
   speedPhysicsY: number
   dragPhysicsY: number
