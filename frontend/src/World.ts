@@ -1,5 +1,8 @@
 export { World, createAdvancedBubble };
 
+import bunny from '../images/chars/bunny.png'
+import bunnyMask from '../images/chars/bunny-mask.png'
+import xpImage from '../images/bubble/xp.png'
 import emojiDetect from './emoji-detect.js'
 
 import {
@@ -104,7 +107,7 @@ class World {
         avatar.isActive = true;
         avatar.lastChatTime = this.time;
         let xpSprite = {
-          src: "images/bubble/xp.png",
+          src: xpImage,
           cutSize: 150,
           displaySize: 100,
         };
@@ -314,8 +317,8 @@ function createNewUserAvatar(
     color: user.color,
     x: x,
     y: 850,
-    src: "images/chars/bunny.png",
-    mask: "images/chars/bunny-mask.png",
+    src: bunny,
+    mask: bunnyMask, 
     time: time,
     displaySize: 100,
   });

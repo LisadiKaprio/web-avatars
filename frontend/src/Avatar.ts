@@ -2,6 +2,7 @@ export { BEHAVIOURS, Avatar, Behaviour, actionPrice };
 import { assertExists } from "./Helpers.js";
 import { ANIMATIONS, Sprite } from "./Sprite.js";
 import { createAdvancedBubble, World } from "./World.js";
+import actionItemsImage from "../images/bubble/action-items.png";
 
 class Avatar {
   // TODO
@@ -256,7 +257,7 @@ class Avatar {
   showIcon(x: number) {
     const iconSize = 100;
     const iconSprite = {
-      src: "images/bubble/action-items.png",
+      src: actionItemsImage,
       cutSize: 100,
       displaySize: iconSize,
     };
