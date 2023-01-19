@@ -167,10 +167,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@zutatensuppe/emoji-detect@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@zutatensuppe/emoji-detect/-/emoji-detect-1.0.4.tgz#c6d7279db38d521a83e9d2801e0da1ff437390bc"
-  integrity sha512-zJTthW7zKXSOhUKW1IbQDv9fCUoIbVAx4PYqomebrT2bMOcyGggqHfExLHGFRkTFxPw6Vgy+KEI1aIbd0GkY3w==
+"@zutatensuppe/emoji-detect@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@zutatensuppe/emoji-detect/-/emoji-detect-1.0.5.tgz#c422197d57b8f8f6f4cc3d77aeddb70892cf5d5c"
+  integrity sha512-YzVaMrr7Og9J0wbz5eiIA7LPCcz7GTScA8VtS3plsv7UmQpDEFLfKVkuiUtfSoANw/lObbvDSh2+uv3+rr/yBA==
 
 acorn-jsx@^5.3.2:
   version "5.3.2"

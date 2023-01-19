@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/LisadiKaprio/web-avatars#readme",
   "dependencies": {
-    "@zutatensuppe/emoji-detect": "^1.0.4"
+    "@zutatensuppe/emoji-detect": "^1.0.5"
   },
   "devDependencies": {
     "eslint": "^8.24.0",
