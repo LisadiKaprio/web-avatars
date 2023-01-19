@@ -20,10 +20,12 @@
     "url": "https://github.com/LisadiKaprio/web-avatars/issues"
   },
   "homepage": "https://github.com/LisadiKaprio/web-avatars#readme",
-  "dependencies": {},
+  "dependencies": {
+    "@zutatensuppe/emoji-detect": "^1.0.4"
+  },
   "devDependencies": {
-    "typescript": "^4.8",
     "eslint": "^8.24.0",
-    "vite" : "^4.0.0"
+    "typescript": "^4.8",
+    "vite": "^4.0.0"
   }
 }

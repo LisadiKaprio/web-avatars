@@ -3,7 +3,7 @@ export { World, createAdvancedBubble };
 import bunny from '../images/chars/bunny.png'
 import bunnyMask from '../images/chars/bunny-mask.png'
 import xpImage from '../images/bubble/xp.png'
-import emojiDetect from './emoji-detect.js'
+import emojiDetect from '@zutatensuppe/emoji-detect'
 
 import {
   UPDATE_PERIOD,
