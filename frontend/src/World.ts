@@ -1,5 +1,10 @@
 export { World, createAdvancedBubble };
 
+import bunny from '../images/chars/bunny.png'
+import bunnyMask from '../images/chars/bunny-mask.png'
+import xpImage from '../images/bubble/xp.png'
+import emojiDetect from '@zutatensuppe/emoji-detect'
+
 import {
   UPDATE_PERIOD,
   ServerMessages,
@@ -102,7 +107,7 @@ class World {
         avatar.isActive = true;
         avatar.lastChatTime = this.time;
         let xpSprite = {
-          src: "images/bubble/xp.png",
+          src: xpImage,
           cutSize: 150,
           displaySize: 100,
         };
@@ -312,8 +317,8 @@ function createNewUserAvatar(
     color: user.color,
     x: x,
     y: 850,
-    src: "images/chars/bunny.png",
-    mask: "images/chars/bunny-mask.png",
+    src: bunny,
+    mask: bunnyMask, 
     time: time,
     displaySize: 100,
   });
@@ -363,21 +368,19 @@ function createAdvancedBubble(config: any) {
 function createNewEmojis(messages: string[], x: number, y: number) {
 	const emotes: Emote[] = [];
 	for (let message of messages) {
-		const matches = message.match(/(\p{EPres}|\p{ExtPict})(\u200d(\p{EPres}|\p{ExtPict})\ufe0f?)*/gu);
-	    matches?.forEach((m) => {
-		    const code = [...m].map(e => e.codePointAt(0)!.toString(16)).join(`-`);
-		    const emote = new Emote({
-			    x: x,
-			    y: y,
-			    src: `https://cdn.betterttv.net/assets/emoji/${code}.svg`,
-				cutSize: 1300,
-				displaySize: 50,
-			    speedPhysicsX: Math.random() * 6 - 3,
-			    speedPhysicsY: -(Math.random() * 5),
-			    dragPhysicsY: -0.02,
-		  	});
-		  	emotes.push(emote);
-		});
+		emojiDetect.detectStrings(message).map(emoji => {
+			const emote = new Emote({
+		      x: x,
+		      y: y,
+		      src: `https://cdn.betterttv.net/assets/emoji/${emoji}.svg`,
+		      cutSize: 1300,
+		      displaySize: 50,
+		      speedPhysicsX: Math.random() * 6 - 3,
+		      speedPhysicsY: -(Math.random() * 5),
+		      dragPhysicsY: -0.02,
+		    });
+		    emotes.push(emote);
+		  });
 	}
 	return emotes;
 }

@@ -284,7 +284,7 @@ const port = 2501;
 // where is our frontend
 app.use(async (Context, next) => {
   try {
-    await Context.send({ root: "../frontend", index: "index.html" });
+    await Context.send({ root: "../frontend/dist", index: "index.html" });
   } catch {
     await next();
   }
